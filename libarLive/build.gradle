@@ -17,7 +17,14 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags '-std=c++11'
+                abiFilters "armeabi-v7a"
             }
+        }
+
+        ndkVersion '18.1.5063045'
+
+        ndk {
+            abiFilters "armeabi-v7a"
         }
     }
 
@@ -43,6 +50,8 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    ndkVersion '18.1.5063045'
 }
 
 dependencies {
