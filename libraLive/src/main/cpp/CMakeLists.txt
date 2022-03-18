@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18.1)
 
-project("libarlive")
+project("libralive")
 
 # 引入c/c++编译源文件
 file(GLOB source_file *.cpp CommonInclude.cpp app_main.cpp)
@@ -22,7 +22,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${CMAKE_SOURCE_DIR}/ffmpeg/libs/${CMAK
 message("${CMAKE_SOURCE_DIR}")
 
 add_library(
-        libarlive
+        libralive
         SHARED
         ${source_file})
 
@@ -32,7 +32,7 @@ find_library(
 
 # 连接动态库
 target_link_libraries(
-        libarlive
+        libralive
         avformat avcodec avfilter avutil swresample swscale
         z
         rtmp

@@ -13,7 +13,7 @@ public:
 
     ~JavaCallHelper();
 
-    //回调java
+    // 回调java
     void onError(int thread, int errorCode);
 
     void onPrepare(int thread);

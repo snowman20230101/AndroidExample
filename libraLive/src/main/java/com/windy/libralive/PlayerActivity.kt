@@ -1,4 +1,4 @@
-package com.windy.libarlive
+package com.windy.libralive
 
 import android.content.res.Configuration
 import android.os.Build
@@ -9,7 +9,7 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.windy.libarlive.databinding.ActivityPlayerBinding
+import com.windy.libralive.databinding.ActivityPlayerBinding
 
 class PlayerActivity : AppCompatActivity() {
 

@@ -25,28 +25,9 @@ JavaCallHelper *javaCallHelper;
  */
 void renderFrameCallBack(uint8_t *data, int lineszie, int w, int ht);
 
-/**
- *
- * @param vm
- * @param reserved
- * @return
- */
-jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-    LOGI("JNI_OnLoad() ");
-
-    int ret = av_jni_set_java_vm(vm, 0);
-
-    if (ret != 0) {
-        LOGE("set java vm failed. %s", av_err2str(ret));
-    }
-
-    javaVM = vm;
-    return JNI_VERSION_1_6;
-}
-
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_windy_libarlive_LibarLivePlayer_native_1prepare(JNIEnv *env, jobject thiz,
+Java_com_windy_libralive_LibarLivePlayer_native_1prepare(JNIEnv *env, jobject thiz,
                                                          jstring data_source) {
     // TODO: implement native_prepare()
     const char *source = env->GetStringUTFChars(data_source, 0);
@@ -58,7 +39,7 @@ Java_com_windy_libarlive_LibarLivePlayer_native_1prepare(JNIEnv *env, jobject th
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_windy_libarlive_LibarLivePlayer_native_1start(JNIEnv *env, jobject thiz) {
+Java_com_windy_libralive_LibarLivePlayer_native_1start(JNIEnv *env, jobject thiz) {
     // TODO: implement native_start()
 
     if (player) {
@@ -68,7 +49,7 @@ Java_com_windy_libarlive_LibarLivePlayer_native_1start(JNIEnv *env, jobject thiz
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_windy_libarlive_LibarLivePlayer_native_1stop(JNIEnv *env, jobject thiz) {
+Java_com_windy_libralive_LibarLivePlayer_native_1stop(JNIEnv *env, jobject thiz) {
     // TODO: implement native_stop()
     if (player) {
         player->stop();
@@ -79,7 +60,7 @@ Java_com_windy_libarlive_LibarLivePlayer_native_1stop(JNIEnv *env, jobject thiz)
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_windy_libarlive_LibarLivePlayer_native_1release(JNIEnv *env, jobject thiz) {
+Java_com_windy_libralive_LibarLivePlayer_native_1release(JNIEnv *env, jobject thiz) {
     // TODO: implement native_release()
     pthread_mutex_lock(&mutex);
     if (window) {
@@ -91,7 +72,7 @@ Java_com_windy_libarlive_LibarLivePlayer_native_1release(JNIEnv *env, jobject th
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_windy_libarlive_LibarLivePlayer_native_1setSurface(JNIEnv *env, jobject thiz,
+Java_com_windy_libralive_LibarLivePlayer_native_1setSurface(JNIEnv *env, jobject thiz,
                                                             jobject surface) {
     // TODO: implement native_setSurface()
     pthread_mutex_lock(&mutex);
@@ -99,7 +80,7 @@ Java_com_windy_libarlive_LibarLivePlayer_native_1setSurface(JNIEnv *env, jobject
     if (window) {
         LOGD("native_setSurface() ANativeWindow_release()");
         ANativeWindow_release(window);
-        window = NULL;
+        window = nullptr;
     }
 
     window = ANativeWindow_fromSurface(env, surface);
@@ -138,4 +119,32 @@ void renderFrameCallBack(uint8_t *src_data, int width, int height, int src_liine
 
     ANativeWindow_unlockAndPost(window);
     pthread_mutex_unlock(&mutex);
+}
+
+/**
+ *
+ * @param vm
+ * @param reserved
+ * @return
+ */
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
+    LOGI("JNI_OnLoad() ");
+
+    JNIEnv *env = nullptr;
+    jint ret = vm->GetEnv((void **) &env, JNI_VERSION_1_6);
+    if (ret != JNI_OK) {
+        return -1;
+    }
+
+    int fret = av_jni_set_java_vm(vm, 0);
+    if (fret != 0) {
+        LOGE("set java vm for ffmpeg failed. %s", av_err2str(fret));
+    }
+
+    javaVM = vm;
+    return JNI_VERSION_1_6;
+}
+
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
+    LOGI("JNI_OnUnload() ");
 }

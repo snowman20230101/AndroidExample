@@ -1,10 +1,11 @@
-package com.windy.libarlive
+package com.windy.libralive
+
+import com.windy.libralive.databinding.ActivityMainBinding;
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import com.windy.libarlive.databinding.ActivityMainBinding
 import java.io.File
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -18,6 +19,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(binding.root)
         binding.btnVedio.setOnClickListener(this)
         binding.btnRtmp.setOnClickListener(this)
+        binding.btnTest.setOnClickListener(this)
 
         // Example of a call to a native method
         binding.ffmpegVersion.text = stringFromJNI()
@@ -27,12 +29,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
      * A native method that is implemented by the 'libarlive' native library,
      * which is packaged with this application.
      */
-    external fun stringFromJNI(): String
+    private external fun stringFromJNI(): String
+
+    private external fun testThrow(code: String)
+
+    fun test() {
+        val i = 5 / 0
+    }
 
     companion object {
         // Used to load the 'libarlive' library on application startup.
         init {
-            System.loadLibrary("libarlive")
+            System.loadLibrary("libralive")
         }
     }
 
@@ -49,6 +57,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 val file = File(getExternalFilesDir(""), "haoshengyin_4.mp4")
                 intent.putExtra("url", file.absolutePath);
                 startActivity(intent)
+            }
+
+            R.id.btn_test -> {
+                testThrow("异常测试")
             }
         }
     }

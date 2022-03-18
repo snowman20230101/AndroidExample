@@ -1,4 +1,4 @@
-package com.windy.libarlive
+package com.windy.libralive
 
 import org.junit.Test
 
