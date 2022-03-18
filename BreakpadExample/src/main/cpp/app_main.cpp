@@ -4,12 +4,8 @@
 
 #include "breakpad/src/client/linux/handler/minidump_descriptor.h"
 #include "breakpad/src/client/linux/handler/exception_handler.h"
-#include <jni.h>
-#include <jni.h>
-#include <jni.h>
 
-bool
-DumpCallback(const google_breakpad::MinidumpDescriptor &descriptor, void *context, bool succeeded) {
+bool DumpCallback(const google_breakpad::MinidumpDescriptor &descriptor, void *context, bool succeeded) {
     __android_log_print(ANDROID_LOG_ERROR, "ndk_crash", "Dump path: %s", descriptor.path());
 
     // 如果回调返回true，Breakpad将把异常视为已完全处理，禁止任何其他处理程序收到异常通知。
@@ -24,8 +20,7 @@ Java_com_windy_breakpadexample_MainActivity_initBreakpad(JNIEnv *env, jobject th
     google_breakpad::MinidumpDescriptor descriptor(cPath);
     static google_breakpad::ExceptionHandler eh(descriptor, NULL, DumpCallback, NULL, true, -1);
 
-    env->ReleaseStringUTFChars(path, cPath
-    );
+    env->ReleaseStringUTFChars(path, cPath);
 }
 
 extern "C"
