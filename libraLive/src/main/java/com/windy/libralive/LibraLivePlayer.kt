@@ -4,7 +4,7 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 
-class LibarLivePlayer(val dataSource: String) : SurfaceHolder.Callback {
+class LibraLivePlayer(val dataSource: String) : SurfaceHolder.Callback {
 
     lateinit var holder: SurfaceHolder
     lateinit var listener: OnPrepareListener
@@ -32,7 +32,8 @@ class LibarLivePlayer(val dataSource: String) : SurfaceHolder.Callback {
     }
 
     /**
-     * JNI DETECTED ERROR IN APPLICATION: JNI GetMethodID called with pending exception java.lang.NoSuchMethodError: no non-static method "Lcom/windy/libarlive/LibarLivePlayer;.onError(I)V"
+     * JNI DETECTED ERROR IN APPLICATION: JNI GetMethodID called with pending exception java.lang.NoSuchMethodError:
+     * no non-static method "Lcom/windy/libarlive/LibarLivePlayer;.onError(I)V"
      *
      *
      *  --------- beginning of crash

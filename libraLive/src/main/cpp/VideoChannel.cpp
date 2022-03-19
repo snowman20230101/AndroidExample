@@ -227,12 +227,14 @@ void VideoChannel::render() {
 
         // 拿到视频 frame timestamp estimated using various heuristics, in stream time base
         this->videoTime = frame->best_effort_timestamp * av_q2d(this->time_base);
+//        LOGE("videoTime=%lld", frame->best_effort_timestamp);
 
         // 拿到音频 播放时间基 audioChannel.audioTime
         double_t audioTime = this->audioChannel->audioTime; // 音频那边的值，是根据它来计算的
 
         // 计算 音频 和 视频的 差值
         double time_diff = videoTime - audioTime;
+        LOGE("time_diff=%f, videoTime=%f, audioTime=%f", time_diff, this->videoTime, audioTime);
 
         if (time_diff > 0) {
             // 说明：视频快一些，音频慢一些

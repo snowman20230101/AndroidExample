@@ -15,6 +15,10 @@ JavaCallHelper::JavaCallHelper(JavaVM *vm, JNIEnv *env, jobject instance) {
     jclass clazz = env->GetObjectClass(this->instance);
     onErrorId = env->GetMethodID(clazz, "onError", "(I)V");
     onPrepareId = env->GetMethodID(clazz, "onPrepare", "()V");
+
+    jweak weakReference = env->NewWeakGlobalRef(instance);
+    jboolean isSame = env->IsSameObject(this->instance, instance);
+
 }
 
 JavaCallHelper::~JavaCallHelper() {
@@ -27,7 +31,7 @@ void JavaCallHelper::onError(int thread, int error) {
         env->CallVoidMethod(instance, onErrorId, error);
     } else {
         // 子线程
-        JNIEnv *env;
+        JNIEnv *env = nullptr;
         // 获得属于我这一个线程的jnienv
         vm->AttachCurrentThread(&env, 0);
         env->CallVoidMethod(instance, onErrorId, error);
@@ -40,7 +44,7 @@ void JavaCallHelper::onPrepare(int thread) {
         env->CallVoidMethod(instance, onPrepareId);
     } else {
         //  子线程
-        JNIEnv *env;
+        JNIEnv *env = nullptr;
         // 获得属于我这一个线程的jnienv
         vm->AttachCurrentThread(&env, 0);
         env->CallVoidMethod(instance, onPrepareId);

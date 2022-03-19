@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.18.1)
 project("libralive")
 
 # 引入c/c++编译源文件
-file(GLOB source_file *.cpp CommonInclude.cpp app_main.cpp)
+file(GLOB source_file *.cpp CommonInclude.cpp app_main.cpp app_liveplayer.cpp)
 
 # 引入头文件
 include_directories(${CMAKE_SOURCE_DIR}/ffmpeg/include)

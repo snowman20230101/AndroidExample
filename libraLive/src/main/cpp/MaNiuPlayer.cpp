@@ -45,8 +45,7 @@ void MaNiuPlayer::init_prepare() {
      */
     int ret = avformat_open_input(&this->formatContext, this->dataSource, NULL, &options);
 
-    //
-//    avformat_close_input(&this->formatContext);
+    // avformat_close_input(&this->formatContext);
 
     // @@@ 注意：字典使用过后，一定要去释放
     av_dict_free(&options); // 释放字典
@@ -107,6 +106,8 @@ void MaNiuPlayer::init_prepare() {
 
         // AVStream 媒体流中就可以拿到时间基 (音视频同步)
         AVRational time_base = avStream->time_base;
+
+        LOGE("视频流时间基 分子=%d, 分母=%d", time_base.num, time_base.den); // 视频流时间基 分子=1, 分母=25000
 
         // TODO 第十步：从编码器参数中获取流类型codec_type
         if (codecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {

@@ -31,10 +31,10 @@ extern "C" {
 #include <libswresample/swresample.h>
 }
 
-//宏函数
+// 宏函数
 #define DELETE(obj) if(obj){ delete obj; obj = 0; }
 
-//标记线程 因为子线程需要attach
+// 标记线程 因为子线程需要attach
 #define THREAD_MAIN 1
 #define THREAD_CHILD 2
 

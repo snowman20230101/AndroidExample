@@ -193,6 +193,7 @@ int AudioChannel::getPcm() {
     // 获取 frame 的一个相对播放时间 （相对开始播放）
     // 获得 相对播放这一段数据的秒数
     this->audioTime = frame->best_effort_timestamp * av_q2d(time_base); // frame->pts
+//    LOGE("     audioTime=%lld", frame->best_effort_timestamp);
 
     releaseAvFrame(&frame);
 
