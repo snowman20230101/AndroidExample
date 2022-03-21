@@ -18,7 +18,7 @@ MaNiuPlayer::MaNiuPlayer(const char *source, JavaCallHelper *helper) {
 }
 
 MaNiuPlayer::~MaNiuPlayer() {
-    DELETE(this->dataSource);
+    DELETE(this->dataSource)
 }
 
 void MaNiuPlayer::prepare() {
@@ -43,7 +43,7 @@ void MaNiuPlayer::init_prepare() {
      * 3.输入的封装格式：一般是让ffmpeg自己去检测，所以给了一个0
      * 4.参数
      */
-    int ret = avformat_open_input(&this->formatContext, this->dataSource, NULL, &options);
+    int ret = avformat_open_input(&this->formatContext, this->dataSource, nullptr, &options);
 
     // avformat_close_input(&this->formatContext);
 
@@ -260,8 +260,8 @@ void *task_init_stop(void *obj) {
         // 保证 start线程结束
         pthread_join(player->pid_play, 0);
 
-        DELETE(player->videoChannel);
-        DELETE(player->audioChannel);
+        DELETE(player->videoChannel)
+        DELETE(player->audioChannel)
 
         // 这时候释放就不会出现问题了
         if (player->formatContext) {
@@ -271,7 +271,7 @@ void *task_init_stop(void *obj) {
             player->formatContext = 0;
         }
 
-        DELETE(player);
+        DELETE(player)
     }
 
     return 0;
