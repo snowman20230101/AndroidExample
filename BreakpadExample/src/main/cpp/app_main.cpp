@@ -2,14 +2,19 @@
 #include <string>
 #include <android/log.h>
 
+#include <gmath.h>
+#include <gperf.h>
+
 #include "breakpad/src/client/linux/handler/minidump_descriptor.h"
 #include "breakpad/src/client/linux/handler/exception_handler.h"
 
-bool DumpCallback(const google_breakpad::MinidumpDescriptor &descriptor, void *context, bool succeeded) {
+bool
+DumpCallback(const google_breakpad::MinidumpDescriptor &descriptor, void *context, bool succeeded) {
     __android_log_print(ANDROID_LOG_ERROR, "ndk_crash", "Dump path: %s", descriptor.path());
 
     // 如果回调返回true，Breakpad将把异常视为已完全处理，禁止任何其他处理程序收到异常通知。
     // 如果回调返回false，Breakpad会将异常视为未处理，并允许其他处理程序处理它。 return false;
+    return false;
 }
 
 extern "C"
@@ -32,6 +37,13 @@ Java_com_windy_breakpadexample_MainActivity_testNativeCrash(JNIEnv *env, jobject
 
 extern "C" JNIEXPORT jstring
 JNICALL Java_com_windy_breakpadexample_MainActivity_getStringFromJni(JNIEnv *env, jobject thiz) {
-    std::string  str = "hello";
+    std::string str = "hello";
+    char *ch = "abc";
+    std::string string1(ch);
+    int sum = add(1, 2);
+    unsigned int a = gpower(0);
+    str.append(std::to_string(sum));
+    __android_log_print(ANDROID_LOG_ERROR, "ndk_crash", "sum is : %d, string1=%s", sum,
+                        string1.c_str());
     return env->NewStringUTF(str.c_str());
 }
