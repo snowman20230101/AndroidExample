@@ -1,0 +1,20 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+
+    implementation group: 'com.squareup.okio', name: 'okio', version: '3.0.0-alpha.9'
+    implementation group: 'org.conscrypt', name: 'conscrypt-openjdk-uber', version: '2.5.2'
+    implementation group: 'com.google.android', name: 'android', version: '4.1.1.4'
+    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+
+//    implementation group: 'org.codehaus.mojo', name: 'animal_sniffer', version: '+'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
