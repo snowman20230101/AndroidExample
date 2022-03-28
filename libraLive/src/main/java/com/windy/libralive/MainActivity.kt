@@ -5,6 +5,7 @@ import com.windy.libralive.databinding.ActivityMainBinding;
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Looper
 import android.view.View
 import java.io.File
 
@@ -23,6 +24,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         // Example of a call to a native method
         binding.ffmpegVersion.text = stringFromJNI()
+
+        Runnable {
+            Looper.prepare();
+
+            Looper.loop();
+        }
     }
 
     /**
@@ -31,7 +38,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
      */
     private external fun stringFromJNI(): String
 
+    /**
+     * 测试 jni throw
+     */
     private external fun testThrow(code: String)
+
+
+    private external fun testStackOverFlow(count: Int, config: String): Array<String>;
 
     fun test() {
         val i = 5 / 0
@@ -60,7 +73,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             R.id.btn_test -> {
-                testThrow("异常测试")
+//                testThrow("异常测试")
+                val arr = testStackOverFlow(100000, "I Love You %d Year！！！")
+                for (s in arr) {
+                    println(s)
+                }
             }
         }
     }

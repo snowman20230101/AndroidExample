@@ -1,14 +1,20 @@
 #include <string>
 #include "CommonInclude.h"
 
+extern "C" {
+#include <librtmp/rtmp.h>
+}
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_windy_libralive_MainActivity_stringFromJNI(JNIEnv *env, jobject /* this */) {
     std::string version = av_version_info();
     std::string hello = "ffmpeg:" + version;
 
     jint envVersion = env->GetVersion();
+    int rtmpVersion = RTMP_LibVersion();
+    hello.append("\n rtmp:" + std::to_string(rtmpVersion));
 
-    LOGD("JNI VERSION:%d", envVersion);
+    LOGD("JNI VERSION:%d, rtmpVersion=%d", envVersion, rtmpVersion);
 
     return env->NewStringUTF(hello.c_str());
 }
@@ -48,4 +54,70 @@ Java_com_windy_libralive_MainActivity_testThrow(JNIEnv *env, jobject thiz, jstri
     env->ReleaseStringUTFChars(code, chrCode);
 
     LOGI("Run After JNI Throw New Exception.");
+}
+
+
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_com_windy_libralive_MainActivity_testStackOverFlow(JNIEnv *env, jobject obj, jint count,
+                                                        jstring config) {
+    jobjectArray str_array = NULL;
+    jclass cls_string = NULL;
+    jmethodID mid_string_init;
+    jobject obj_str = NULL;
+    const char *c_str_sample = NULL;
+    char buff[256];
+    int i;
+
+    // 保证至少可以创建3个局部引用（str_array，cls_string，obj_str）
+//    if (env->EnsureLocalCapacity(3) != JNI_OK) {
+//        return NULL;
+//    }
+
+    c_str_sample = (env)->GetStringUTFChars(config, NULL);
+    if (c_str_sample == NULL) {
+        return NULL;
+    }
+
+    cls_string = (env)->FindClass("java/lang/String");
+    if (cls_string == NULL) {
+        return NULL;
+    }
+
+    // 获取String的构造方法
+    mid_string_init = (env)->GetMethodID(cls_string, "<init>", "()V");
+    if (mid_string_init == NULL) {
+        (env)->DeleteLocalRef(cls_string);
+        return NULL;
+    }
+    obj_str = (env)->NewObject(cls_string, mid_string_init);
+    if (obj_str == NULL) {
+        (env)->DeleteLocalRef(cls_string);
+        return NULL;
+    }
+
+    // 创建一个字符串数组
+    str_array = (env)->NewObjectArray(count, cls_string, obj_str);
+    if (str_array == NULL) {
+        (env)->DeleteLocalRef(cls_string);
+        (env)->DeleteLocalRef(obj_str);
+        return NULL;
+    }
+
+    // 给数组中每个元素赋值
+    for (i = 0; i < count; ++i) {
+        memset(buff, 0, sizeof(buff));   // 初始一下缓冲区
+        sprintf(buff, c_str_sample, i);
+        jstring newStr = (env)->NewStringUTF(buff);
+        (env)->SetObjectArrayElement(str_array, i, newStr);
+    }
+
+    // 释放模板字符串所占的内存
+    (env)->ReleaseStringUTFChars(config, c_str_sample);
+
+    // 释放局部引用所占用的资源
+    (env)->DeleteLocalRef(cls_string);
+    (env)->DeleteLocalRef(obj_str);
+
+    return str_array;
 }
