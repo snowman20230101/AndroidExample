@@ -16,11 +16,17 @@ import android.widget.Button;
 import java.io.File;
 import java.io.IOException;
 
+import okhttp3.Cache;
+import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -102,9 +108,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void getOKHttp() {
         // https://api.github.com/users/bboywindy
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        builder.addInterceptor(httpLoggingInterceptor);
+        builder.cache(new Cache(new File(getExternalFilesDir(""), "okhttp_cache"), 10 * 1024 * 1024));
         OkHttpClient okHttpClient = builder.build();
 
+//        RequestBody requestBody = new MultipartBody.Builder().build();
+        FormBody formBody = new FormBody.Builder().build();
+
+
         Request request = new Request.Builder()
+                .cacheControl(new CacheControl.Builder().build())
+//                .post(formBody)
                 .url("https://api.github.com/users/bboywindy")
                 .build();
 
