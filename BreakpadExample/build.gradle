@@ -61,4 +61,5 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.8.1'
 
     implementation project(':jni-libs')
+    implementation project(':okhttp3-java')
 }

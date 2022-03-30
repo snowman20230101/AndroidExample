@@ -1,6 +1,8 @@
 #include <jni.h>
 #include <string>
 #include <android/log.h>
+#include <sys/eventfd.h>
+#include <sys/epoll.h>
 
 #include <gmath.h>
 #include <gperf.h>
