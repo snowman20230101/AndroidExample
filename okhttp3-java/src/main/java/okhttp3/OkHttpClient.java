@@ -52,9 +52,11 @@ import okio.Source;
 
 import static okhttp3.internal.Util.checkDuration;
 
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 /**
  * Factory for {@linkplain Call calls}, which can be used to send HTTP requests and read their
@@ -128,7 +130,7 @@ import androidx.annotation.Nullable;
  */
 public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory {
 
-    public final static String TAG = OkHttpClient.class.getSimpleName();
+    public final static String TAG = "HTTP";//OkHttpClient.class.getSimpleName();
 
     static final List<Protocol> DEFAULT_PROTOCOLS = Util.immutableList(
             Protocol.HTTP_2, Protocol.HTTP_1_1);
@@ -567,6 +569,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
          * <p>The default value is 0 which imposes no timeout.
          */
 //        @IgnoreJRERequirement
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public Builder callTimeout(Duration duration) {
             callTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
             return this;
@@ -594,6 +597,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
          * The default value is 10 seconds.
          */
 //        @IgnoreJRERequirement
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public Builder connectTimeout(Duration duration) {
             connectTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
             return this;
@@ -625,6 +629,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
          * @see Source#timeout()
          */
 //        @IgnoreJRERequirement
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public Builder readTimeout(Duration duration) {
             readTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
             return this;
@@ -654,6 +659,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
          * @see Sink#timeout()
          */
 //        @IgnoreJRERequirement
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public Builder writeTimeout(Duration duration) {
             writeTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
             return this;
@@ -691,6 +697,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
          * <p>The default value of 0 disables client-initiated pings.
          */
 //        @IgnoreJRERequirement
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public Builder pingInterval(Duration duration) {
             pingInterval = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
             return this;

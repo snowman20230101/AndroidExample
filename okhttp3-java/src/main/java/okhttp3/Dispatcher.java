@@ -204,17 +204,12 @@ public final class Dispatcher {
                 AsyncCall asyncCall = i.next();
 
                 if (runningAsyncCalls.size() >= maxRequests) break; // Max capacity.
-                int i1 = asyncCall.callsPerHost().get();
-
-                Log.d(OkHttpClient.TAG, "promoteAndExecute: 原子操作  " + i1);
 
                 if (asyncCall.callsPerHost().get() >= maxRequestsPerHost)
                     continue; // Host max capacity.
 
                 i.remove();
                 asyncCall.callsPerHost().incrementAndGet(); // 原子递增
-
-                Log.d(OkHttpClient.TAG, "promoteAndExecute: incrementAndGet () after 原子操作  " + asyncCall.callsPerHost().get());
 
                 executableCalls.add(asyncCall);
                 runningAsyncCalls.add(asyncCall);

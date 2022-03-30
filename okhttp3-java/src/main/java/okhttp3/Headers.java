@@ -17,6 +17,8 @@
 
 package okhttp3;
 
+import android.os.Build;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +31,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
 import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpDate;
 //import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
@@ -79,6 +83,7 @@ public final class Headers {
    * either the field is absent or cannot be parsed as a date.
    */
 //  @IgnoreJRERequirement
+  @RequiresApi(api = Build.VERSION_CODES.O)
   public @Nullable Instant getInstant(String name) {
     Date value = getDate(name);
     return value != null ? value.toInstant() : null;

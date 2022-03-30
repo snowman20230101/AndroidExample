@@ -49,6 +49,8 @@ import static okhttp3.internal.http2.Header.TARGET_PATH_UTF8;
 import static okhttp3.internal.http2.Header.TARGET_SCHEME;
 import static okhttp3.internal.http2.Header.TARGET_SCHEME_UTF8;
 
+import android.util.Log;
+
 /**
  * Encode requests and responses using HTTP/2 frames.
  */
@@ -97,6 +99,8 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
 
     public Http2ExchangeCodec(OkHttpClient client, RealConnection realConnection,
                               Interceptor.Chain chain, Http2Connection connection) {
+        Log.d(OkHttpClient.TAG, "new Http2ExchangeCodec: ");
+
         this.realConnection = realConnection;
         this.chain = chain;
         this.connection = connection;

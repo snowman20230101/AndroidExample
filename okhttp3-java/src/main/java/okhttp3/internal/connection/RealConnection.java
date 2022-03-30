@@ -136,6 +136,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
     long idleAtNanos = Long.MAX_VALUE;
 
     public RealConnection(RealConnectionPool connectionPool, Route route) {
+        Log.d(TAG, "创建了 RealConnection: " + connectionPool + ", route:" + route.toString());
         this.connectionPool = connectionPool;
         this.route = route;
     }

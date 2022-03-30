@@ -16,11 +16,13 @@
 package okhttp3.internal.platform;
 
 import android.annotation.SuppressLint;
-//import android.net.ssl.SSLSockets;
+import android.net.ssl.SSLSockets;
+
 import java.io.IOException;
 import java.util.List;
 
 import androidx.annotation.Nullable;
+
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
 
@@ -57,9 +59,9 @@ class Android10Platform extends AndroidPlatform {
     }
 
     private void enableSessionTickets(SSLSocket sslSocket) {
-//    if (SSLSockets.isSupportedSocket(sslSocket)) {
-//      SSLSockets.setUseSessionTickets(sslSocket, true);
-//    }
+        if (SSLSockets.isSupportedSocket(sslSocket)) {
+            SSLSockets.setUseSessionTickets(sslSocket, true);
+        }
     }
 
     //  @IgnoreJRERequirement

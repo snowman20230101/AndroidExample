@@ -44,6 +44,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static okhttp3.internal.Util.checkOffsetAndCount;
 import static okhttp3.internal.http.StatusLine.HTTP_CONTINUE;
 
+import android.util.Log;
+
 /**
  * A socket connection that can be used to send HTTP/1.1 messages. This class strictly enforces the
  * following lifecycle:
@@ -96,6 +98,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
     private Headers trailers;
 
     public Http1ExchangeCodec(OkHttpClient client, RealConnection realConnection, BufferedSource source, BufferedSink sink) {
+        Log.d(OkHttpClient.TAG, "new Http1ExchangeCodec: ");
         this.client = client;
         this.realConnection = realConnection;
         this.source = source;

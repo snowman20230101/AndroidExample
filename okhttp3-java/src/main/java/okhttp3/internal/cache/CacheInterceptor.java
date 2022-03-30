@@ -39,6 +39,7 @@ import okio.Sink;
 import okio.Source;
 import okio.Timeout;
 
+import static java.net.HttpURLConnection.HTTP_GATEWAY_TIMEOUT;
 import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static okhttp3.internal.Util.closeQuietly;
@@ -80,7 +81,7 @@ public final class CacheInterceptor implements Interceptor {
             return new Response.Builder()
                     .request(chain.request())
                     .protocol(Protocol.HTTP_1_1)
-                    .code(504)
+                    .code(HTTP_GATEWAY_TIMEOUT)
                     .message("Unsatisfiable Request (only-if-cached)")
                     .body(Util.EMPTY_RESPONSE)
                     .sentRequestAtMillis(-1L)

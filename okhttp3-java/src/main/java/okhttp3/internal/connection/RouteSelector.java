@@ -225,6 +225,10 @@ final class RouteSelector {
 
         Selection(List<Route> routes) {
             this.routes = routes;
+
+            for (int i = 0; i < this.routes.size(); i++) {
+                Log.d(TAG, "Selection: " + routes.get(i).toString());
+            }
         }
 
         public boolean hasNext() {
