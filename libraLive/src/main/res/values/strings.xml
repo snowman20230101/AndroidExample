@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">AndroidExample</string>
+    <string name="title_home">Home</string>
+    <string name="title_shop">Shop</string>
+    <string name="title_msg">Message</string>
+    <string name="title_me">Me</string>
 </resources>

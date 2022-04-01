@@ -6,7 +6,8 @@ extern "C" {
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_windy_libralive_MainActivity_stringFromJNI(JNIEnv *env, jobject /* this */) {
+Java_com_windy_libralive_external_NativeCaseTesting_00024Companion_stringFromJNI(JNIEnv *env,
+                                                                                 jobject /* this */) {
     std::string version = av_version_info();
     std::string hello = "ffmpeg:" + version;
 
@@ -21,7 +22,9 @@ Java_com_windy_libralive_MainActivity_stringFromJNI(JNIEnv *env, jobject /* this
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_windy_libralive_MainActivity_testThrow(JNIEnv *env, jobject thiz, jstring code) {
+Java_com_windy_libralive_external_NativeCaseTesting_00024Companion_testThrow(JNIEnv *env,
+                                                                             jobject thiz,
+                                                                             jstring code) {
 
     const char *chrCode = env->GetStringUTFChars(code, JNI_FALSE);
 
@@ -59,8 +62,10 @@ Java_com_windy_libralive_MainActivity_testThrow(JNIEnv *env, jobject thiz, jstri
 
 extern "C"
 JNIEXPORT jobjectArray JNICALL
-Java_com_windy_libralive_MainActivity_testStackOverFlow(JNIEnv *env, jobject obj, jint count,
-                                                        jstring config) {
+Java_com_windy_libralive_external_NativeCaseTesting_00024Companion_testStackOverFlow(JNIEnv *env,
+                                                                                     jobject obj,
+                                                                                     jint count,
+                                                                                     jstring config) {
     jobjectArray str_array = NULL;
     jclass cls_string = NULL;
     jmethodID mid_string_init;

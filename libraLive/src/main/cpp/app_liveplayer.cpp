@@ -96,7 +96,7 @@ static int registerNativesMethods(JNIEnv *env, const char *className,
 }
 
 int register_com_windy_libralive_LibraPlayer(JNIEnv *env) {
-    const char *className = "com/windy/libralive/LibraLivePlayer";
+    const char *className = "com/windy/libralive/external/LibraLivePlayer";
 
     JNINativeMethod methods[] = {
             {"native_prepare",    "(Ljava/lang/String;)V",     (void *) com_windy_libralive_LibraPlayer_native_prepare},

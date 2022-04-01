@@ -1,4 +1,4 @@
-package com.windy.libralive.model
+package com.windy.libralive.data.model
 
 
 data class BannerBean constructor(

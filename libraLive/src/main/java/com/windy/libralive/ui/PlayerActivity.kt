@@ -1,4 +1,4 @@
-package com.windy.libralive
+package com.windy.libralive.ui
 
 import android.content.res.Configuration
 import android.os.Build
@@ -8,10 +8,12 @@ import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import com.windy.libralive.databinding.ActivityPlayerBinding
 
-class PlayerActivity : AppCompatActivity() {
+import com.windy.libralive.base.BaseActivity
+import com.windy.libralive.databinding.ActivityPlayerBinding
+import com.windy.libralive.external.LibraLivePlayer
+
+class PlayerActivity : BaseActivity() {
 
     private val TAG: String? = PlayerActivity::class.simpleName
 
