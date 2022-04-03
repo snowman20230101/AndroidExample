@@ -10,6 +10,10 @@ class HomeViewModel : BaseViewModel() {
         value = "This is home Fragment"
     }
 
+    val state = MutableLiveData<Int>().apply {
+        this.value = 0
+    }
+
     init {
         modelClassName = HomeViewModel::class.java.simpleName
     }

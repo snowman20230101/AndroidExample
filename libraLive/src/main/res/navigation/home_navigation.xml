@@ -18,7 +18,7 @@
 
     <fragment
         android:id="@+id/navigation_msg"
-        android:name="com.windy.libralive.ui.messge.MsgFragment"
+        android:name="com.windy.libralive.ui.message.MsgFragment"
         android:label="@string/title_msg"
         tools:layout="@layout/fragment_msg" />
 

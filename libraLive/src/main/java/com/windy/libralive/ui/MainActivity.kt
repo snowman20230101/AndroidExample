@@ -3,6 +3,8 @@ package com.windy.libralive.ui
 import com.windy.libralive.databinding.ActivityMainBinding;
 
 import android.os.Bundle
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -11,12 +13,18 @@ import com.windy.libralive.R
 import com.windy.libralive.base.BaseActivity
 
 class MainActivity : BaseActivity() {
-    private lateinit var binding: ActivityMainBinding
+    private var _binding: ActivityMainBinding? = null
+    private val binding: ActivityMainBinding get() = _binding!!
+    private lateinit var viewModel: MainVewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
+        viewModel =
+            ViewModelProvider(this, defaultViewModelProviderFactory)[MainVewModel::class.java]
+
+        _binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+        binding.vm = viewModel
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
         val topLevelDestinationIds = setOf<Int>(

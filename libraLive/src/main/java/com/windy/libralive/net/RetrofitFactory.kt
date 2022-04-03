@@ -1,6 +1,8 @@
-package com.windy.libralive.net.common
+package com.windy.libralive.net
 
-import com.windy.libralive.net.api.Api
+import com.windy.libralive.api.Api
+import com.windy.libralive.net.common.ANDROID_URL
+import com.windy.libralive.net.common.BaseRetrofitFactory
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 
@@ -28,7 +30,7 @@ class RetrofitFactory private constructor(private val hostType: Int = ANDROID_UR
     }
 
     override fun handleBuilder(builder: OkHttpClient.Builder) {
-
+        builder.eventListener(OkHttpEventListener())
     }
 
     override fun retrofitBuilder(builder: Retrofit.Builder) {

@@ -1,4 +1,4 @@
-package com.windy.libralive.net.api
+package com.windy.libralive.api
 
 object HttpApi {
     private const val HTTPS = "https://"

@@ -1,7 +1,9 @@
 package com.windy.libralive.net.common
 
 import androidx.viewbinding.BuildConfig
-import com.windy.libralive.net.api.HttpApi
+import com.windy.libralive.api.HttpApi
+import com.windy.libralive.net.HeadersInterceptor
+import com.windy.libralive.net.NetworkStatusInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -39,6 +41,7 @@ abstract class BaseRetrofitFactory {
             okHttpClientbuilder.readTimeout(DEFAULT_TIME.toLong(), TimeUnit.SECONDS)
             okHttpClientbuilder.writeTimeout(DEFAULT_TIME.toLong(), TimeUnit.SECONDS)
             okHttpClientbuilder.retryOnConnectionFailure(true) // 重定向
+            okHttpClientbuilder.addInterceptor(NetworkStatusInterceptor())
 
             // 日志拦截器
             okHttpClientbuilder.addInterceptor(HttpLoggingInterceptor().apply {

@@ -1,4 +1,4 @@
-package com.windy.libralive.base
+package com.windy.libralive.common
 
 import android.util.Log
 import androidx.lifecycle.LifecycleOwner

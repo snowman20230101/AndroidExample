@@ -1,4 +1,4 @@
-package com.windy.libralive.net.api
+package com.windy.libralive.api
 
 import com.windy.libralive.data.model.BannerBean
 import com.windy.libralive.data.model.BaseResponse

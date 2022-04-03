@@ -10,14 +10,14 @@ import android.view.WindowManager
 import android.widget.Toast
 
 import com.windy.libralive.base.BaseActivity
-import com.windy.libralive.databinding.ActivityPlayerBinding
+//import com.windy.libralive.databinding.ActivityPlayerBinding
 import com.windy.libralive.external.LibraLivePlayer
 
 class PlayerActivity : BaseActivity() {
 
     private val TAG: String? = PlayerActivity::class.simpleName
 
-    lateinit var binding: ActivityPlayerBinding
+//    lateinit var binding: ActivityPlayerBinding
     lateinit var player: LibraLivePlayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,28 +27,28 @@ class PlayerActivity : BaseActivity() {
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
-        binding = ActivityPlayerBinding.inflate(layoutInflater)
-        hideSystemUI()
-        setContentView(binding.root)
-
-        val stringExtra = intent.getStringExtra("url")
-        Log.d(TAG, "onCreate: $stringExtra")
-
-        player = LibraLivePlayer(stringExtra!!)
-        player.setSurfaceView(binding.surfaceView)
-        player.setOnPrepareListener(object : LibraLivePlayer.OnPrepareListener {
-            override fun onPrepare() {
-                runOnUiThread(object : Runnable {
-                    override fun run() {
-                        Toast.makeText(this@PlayerActivity, "开始播放", Toast.LENGTH_SHORT).show()
-                    }
-                })
-
-                player.start()
-            }
-        })
-
-        binding = ActivityPlayerBinding.inflate(layoutInflater);
+//        binding = ActivityPlayerBinding.inflate(layoutInflater)
+//        hideSystemUI()
+//        setContentView(binding.root)
+//
+//        val stringExtra = intent.getStringExtra("url")
+//        Log.d(TAG, "onCreate: $stringExtra")
+//
+//        player = LibraLivePlayer(stringExtra!!)
+//        player.setSurfaceView(binding.surfaceView)
+//        player.setOnPrepareListener(object : LibraLivePlayer.OnPrepareListener {
+//            override fun onPrepare() {
+//                runOnUiThread(object : Runnable {
+//                    override fun run() {
+//                        Toast.makeText(this@PlayerActivity, "开始播放", Toast.LENGTH_SHORT).show()
+//                    }
+//                })
+//
+//                player.start()
+//            }
+//        })
+//
+//        binding = ActivityPlayerBinding.inflate(layoutInflater);
 
     }
 
@@ -62,8 +62,8 @@ class PlayerActivity : BaseActivity() {
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
-        setContentView(binding.getRoot());
-        player.setSurfaceView(binding.surfaceView)
+//        setContentView(binding.getRoot());
+//        player.setSurfaceView(binding.surfaceView)
     }
 
     override fun onResume() {
@@ -84,14 +84,14 @@ class PlayerActivity : BaseActivity() {
     private fun hideSystemUI() {
         if (Build.VERSION.SDK_INT >= 19) {
             Log.d(TAG, "hideSystemUI: ")
-            this.binding.surfaceView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            )
+//            this.binding.surfaceView.setSystemUiVisibility(
+//                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+//                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//            )
 
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
