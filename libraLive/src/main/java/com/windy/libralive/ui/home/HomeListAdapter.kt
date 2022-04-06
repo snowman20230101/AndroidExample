@@ -2,8 +2,8 @@ package com.windy.libralive.ui.home
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.windy.libralive.base.model.BaseModel
 import com.windy.libralive.base.view.IBaseView
-import com.windy.libralive.base.viewmodel.BaseViewModel
 import com.windy.libralive.common.BaseBindingViewHolder
 import com.windy.libralive.data.model.home.HomeBean
 
@@ -19,10 +19,10 @@ class HomeListAdapter : RecyclerView.Adapter<BaseBindingViewHolder>() {
     ): BaseBindingViewHolder {
         if (viewType == VIEW_ITEM_TWO_TYPE) {
             val homeItemOneView = HomeItemOneView(parent.context)
-            return BaseBindingViewHolder(homeItemOneView)
+            return BaseBindingViewHolder(homeItemOneView as IBaseView<BaseModel>)
         } else {
             val homeItemTwoView = HomeItemTwoView(parent.context)
-            return BaseBindingViewHolder(homeItemTwoView)
+            return BaseBindingViewHolder(homeItemTwoView as IBaseView<BaseModel>)
         }
     }
 

@@ -24,13 +24,9 @@ abstract class BaseView<VB : ViewDataBinding, VM : BaseModel> constructor(
         initBinding()
     }
 
-    constructor(context: Context, attributeSet: AttributeSet) : this(context, attributeSet, 0) {
-        initBinding()
-    }
+    constructor(context: Context, attributeSet: AttributeSet) : this(context, attributeSet, 0)
 
-    constructor(context: Context) : this(context, null, 0) {
-        initBinding()
-    }
+    constructor(context: Context) : this(context, null, 0)
 
     private fun initBinding() {
         val layoutInflater =
@@ -47,16 +43,6 @@ abstract class BaseView<VB : ViewDataBinding, VM : BaseModel> constructor(
         bind(viewModel)
         binding.executePendingBindings()
     }
-
-//    fun invoke(): IBaseView<VM> {
-//        return object : IBaseView<VM> {
-//            override fun bindViewModel(viewModel: VM) {
-//                this@BaseView.viewModel = viewModel
-//                bind(viewModel)
-//                binding.executePendingBindings()
-//            }
-//        }
-//    }
 
     /**
      * 手动绑定，ViewModel
