@@ -1,4 +1,4 @@
-package com.windy.libralive.base
+package com.windy.libralive.base.view
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

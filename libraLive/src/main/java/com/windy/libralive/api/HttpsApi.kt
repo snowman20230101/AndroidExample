@@ -1,6 +1,6 @@
 package com.windy.libralive.api
 
-object HttpApi {
+object HttpsApi {
     private const val HTTPS = "https://"
 
     const val BASE_URL: String = HTTPS + "www.wanandroid.com"

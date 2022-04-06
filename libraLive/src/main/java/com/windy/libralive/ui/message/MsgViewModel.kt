@@ -2,7 +2,7 @@ package com.windy.libralive.ui.message
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.windy.libralive.base.BaseViewModel
+import com.windy.libralive.base.viewmodel.BaseViewModel
 
 class MsgViewModel : BaseViewModel() {
 

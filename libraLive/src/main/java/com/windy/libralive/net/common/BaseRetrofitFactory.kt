@@ -1,7 +1,7 @@
 package com.windy.libralive.net.common
 
 import androidx.viewbinding.BuildConfig
-import com.windy.libralive.api.HttpApi
+import com.windy.libralive.api.HttpsApi
 import com.windy.libralive.net.HeadersInterceptor
 import com.windy.libralive.net.NetworkStatusInterceptor
 import okhttp3.OkHttpClient
@@ -83,9 +83,9 @@ abstract class BaseRetrofitFactory {
      */
     private fun getHost(hostType: Int): String {
         return when (hostType) {
-            ANDROID_URL -> HttpApi.BASE_URL
-            WAN_ANDROID -> HttpApi.GANK_IO_URL
-            else -> HttpApi.BASE_URL
+            ANDROID_URL -> HttpsApi.BASE_URL
+            WAN_ANDROID -> HttpsApi.GANK_IO_URL
+            else -> HttpsApi.BASE_URL
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.windy.libralive.ui.home
 
-import android.annotation.SuppressLint
 import android.content.ContentUris
+import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -12,10 +12,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.RecyclerView
 import com.windy.libralive.R
-import com.windy.libralive.base.BaseFragment
+import com.windy.libralive.base.view.BaseFragment
 import com.windy.libralive.common.GridSpaceItemDecoration
-import com.windy.libralive.data.model.Photo
 import com.windy.libralive.databinding.FragmentHomeBinding
 
 class HomeFragment : BaseFragment() {
@@ -23,13 +24,12 @@ class HomeFragment : BaseFragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val images = mutableListOf<Photo>()
+//    private val images = mutableListOf<Photo>()
 
     private lateinit var viewModel: HomeViewModel
 
-    private lateinit var adapter: LocalPhotoListAdapter
+    private lateinit var adapter: HomeListAdapter
 
-    @SuppressLint("Recycle")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -38,7 +38,8 @@ class HomeFragment : BaseFragment() {
             defaultViewModelProviderFactory
         )[HomeViewModel::class.java]
 
-        loadImage()
+//        loadImage()
+        viewModel.getArticleJson(0)
     }
 
     override fun onCreateView(
@@ -59,13 +60,15 @@ class HomeFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        adapter = LocalPhotoListAdapter(requireContext())
-        binding.rv.adapter = adapter
+        adapter = HomeListAdapter()
+        binding.recyclerView.adapter = adapter
 
-        val dividerItemDecoration = GridSpaceItemDecoration(2, 5)
-        binding.rv.addItemDecoration(dividerItemDecoration)
-        viewModel.state.observe(viewLifecycleOwner) {
-            adapter.mList.addAll(images)
+        val gridSpaceItemDecoration = GridSpaceItemDecoration(2, 5)
+        val dividerItemDecoration = DividerItemDecoration(requireContext(), RecyclerView.VERTICAL)
+        binding.recyclerView.addItemDecoration(dividerItemDecoration)
+
+        viewModel.mDataBeans.observe(viewLifecycleOwner) {
+            adapter.items.addAll(it.datas)
             adapter.notifyDataSetChanged()
         }
     }
@@ -79,7 +82,7 @@ class HomeFragment : BaseFragment() {
         super.onDestroy()
     }
 
-    private fun loadImage() {
+    private fun loadImage(context: Context) {
         val uriExternal: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf<String>(
             MediaStore.Images.Media._ID,
@@ -106,16 +109,14 @@ class HomeFragment : BaseFragment() {
                 val dataValue = cursor.getString(data)
                 val withAppendedId = ContentUris.withAppendedId(uriExternal, imageId.toLong())
                 if (withAppendedId != null)
-                    images.add(Photo(imageId.toInt(), name, withAppendedId))
+//                    images.add(Photo(imageId.toInt(), name, withAppendedId))
 
                 // 464553
                 // IMG_20210724_103134.jpg
                 // /storage/emulated/0/DCIM/Camera/IMG_20210724_103134.jpg
                 // content://media/external/images/media/464553
-                Log.i("HomeFragment", "onCreate: $dataValue")
+                    Log.i("HomeFragment", "onCreate: $dataValue")
             }
         }
-
-        viewModel.state.postValue(viewModel.state.value?.plus(1))
     }
 }

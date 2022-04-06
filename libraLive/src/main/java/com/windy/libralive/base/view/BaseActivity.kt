@@ -1,4 +1,4 @@
-package com.windy.libralive.base
+package com.windy.libralive.base.view
 
 import android.app.Activity
 import android.app.Application

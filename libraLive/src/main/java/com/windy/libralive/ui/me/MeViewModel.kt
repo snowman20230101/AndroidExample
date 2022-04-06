@@ -2,8 +2,7 @@ package com.windy.libralive.ui.me
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.windy.libralive.base.BaseViewModel
-import com.windy.libralive.ui.home.HomeViewModel
+import com.windy.libralive.base.viewmodel.BaseViewModel
 
 class MeViewModel : BaseViewModel() {
 

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="vm"
             type="com.windy.libralive.ui.home.HomeViewModel" />
@@ -15,16 +16,15 @@
         tools:context=".ui.home.HomeFragment">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv"
+            android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:orientation="vertical"
             android:visibility="visible"
             app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
-            app:spanCount="2"
-            tools:ignore="MissingConstraints"
-            tools:listitem="@layout/item_home_list" />
+            app:spanCount="1"
+            tools:listitem="@layout/item_home_one" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

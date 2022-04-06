@@ -1,10 +1,9 @@
 package com.windy.libralive.ui.message
 
 import android.content.Context
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.windy.libralive.R
-import com.windy.libralive.base.BaseBindingAdapter
+import com.windy.libralive.common.BaseBindingAdapter
 import com.windy.libralive.data.model.Video
 import com.windy.libralive.databinding.ItemMsgListBinding
 

@@ -4,12 +4,10 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.widget.Toast
 
-import com.windy.libralive.base.BaseActivity
+import com.windy.libralive.base.view.BaseActivity
 //import com.windy.libralive.databinding.ActivityPlayerBinding
 import com.windy.libralive.external.LibraLivePlayer
 

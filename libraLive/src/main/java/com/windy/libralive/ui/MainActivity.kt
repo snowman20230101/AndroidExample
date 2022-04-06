@@ -10,7 +10,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.windy.libralive.R
-import com.windy.libralive.base.BaseActivity
+import com.windy.libralive.base.view.BaseActivity
 
 class MainActivity : BaseActivity() {
     private var _binding: ActivityMainBinding? = null

@@ -2,7 +2,7 @@ package com.windy.libralive.ui.shop
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.windy.libralive.base.BaseViewModel
+import com.windy.libralive.base.viewmodel.BaseViewModel
 
 class ShopViewModel : BaseViewModel() {
     val text: LiveData<String?> = MutableLiveData<String?>().apply {

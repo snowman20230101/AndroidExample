@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.windy.libralive.R
-import com.windy.libralive.base.BaseFragment
+import com.windy.libralive.base.view.BaseFragment
 import com.windy.libralive.common.GridSpaceItemDecoration
 import com.windy.libralive.data.model.Video
 import com.windy.libralive.databinding.FragmentMsgBinding

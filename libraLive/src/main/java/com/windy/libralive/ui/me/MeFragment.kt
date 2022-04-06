@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.windy.libralive.R
-import com.windy.libralive.base.BaseFragment
+import com.windy.libralive.base.view.BaseFragment
 import com.windy.libralive.databinding.FragmentMeBinding
 
 class MeFragment : BaseFragment() {
