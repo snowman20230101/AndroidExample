@@ -45,9 +45,7 @@ abstract class BaseBindingAdapter<Model, ViewBinding : ViewDataBinding>(
             false
         )
 
-//        return BaseBindingViewHolder(null)
-
-        TODO()
+        return BaseBindingViewHolder2(binding.root)
     }
 
     override fun getItemCount(): Int = mList.size
@@ -60,5 +58,7 @@ abstract class BaseBindingAdapter<Model, ViewBinding : ViewDataBinding>(
         holder: RecyclerView.ViewHolder,
         position: Int
     )
+
+    class BaseBindingViewHolder2(private val itemView: View) : RecyclerView.ViewHolder(itemView)
 }
 
