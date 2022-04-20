@@ -18,7 +18,7 @@ public class BinaryTree {
                 node = node.left;
             } else if (value > node.value) {
                 node = node.right;
-            } else {//是重复值 就不理会了
+            } else {// 是重复值 就不理会了
                 return node;
             }
         }

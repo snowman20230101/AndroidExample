@@ -9,16 +9,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.windy.breakpadexample.view.GameView;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends BaseActivity {
 
     private GameView mGameView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        TAG = GameActivity.class.getSimpleName();
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // Lock orientation into landscape.
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         // Create a GameView and bind it to this activity.
         // You don't need a ViewGroup to fill the screen, because the system

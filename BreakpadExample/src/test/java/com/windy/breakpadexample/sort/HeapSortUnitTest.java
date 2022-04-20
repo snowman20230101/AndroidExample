@@ -1,6 +1,6 @@
 package com.windy.breakpadexample.sort;
 
-import com.windy.breakpadexample.util.Utils;
+//import com.windy.breakpadexample.util.Utils;
 
 import org.junit.Test;
 
@@ -61,6 +61,6 @@ public class HeapSortUnitTest {
     public void testHeapSort() {
         int[] array = {7, 3, 2, 1, 6, 9, 4, 8, 5};
         heapSort(array, array.length);
-        Utils.printArray(array);
+//        Utils.printArray(array);
     }
 }

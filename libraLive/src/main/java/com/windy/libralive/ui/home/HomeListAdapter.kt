@@ -8,8 +8,8 @@ import com.windy.libralive.common.BaseBindingViewHolder
 import com.windy.libralive.data.model.home.HomeBean
 
 class HomeListAdapter : RecyclerView.Adapter<BaseBindingViewHolder>() {
-    private val VIEW_ITEM_ONE_TYPE = 0
-    private val VIEW_ITEM_TWO_TYPE = 1
+    private val VIEW_TYPE_ITEM_ONE = 0
+    private val VIEW_TYPE_ITEM_TWO = 1
 
     val items = mutableListOf<HomeBean>()
 
@@ -17,12 +17,12 @@ class HomeListAdapter : RecyclerView.Adapter<BaseBindingViewHolder>() {
         parent: ViewGroup,
         viewType: Int,
     ): BaseBindingViewHolder {
-        if (viewType == VIEW_ITEM_TWO_TYPE) {
+        return if (viewType == VIEW_TYPE_ITEM_TWO) {
             val homeItemOneView = HomeItemOneView(parent.context)
-            return BaseBindingViewHolder(homeItemOneView as IBaseView<BaseModel>)
+            BaseBindingViewHolder(homeItemOneView as IBaseView<BaseModel>)
         } else {
             val homeItemTwoView = HomeItemTwoView(parent.context)
-            return BaseBindingViewHolder(homeItemTwoView as IBaseView<BaseModel>)
+            BaseBindingViewHolder(homeItemTwoView as IBaseView<BaseModel>)
         }
     }
 
@@ -33,6 +33,6 @@ class HomeListAdapter : RecyclerView.Adapter<BaseBindingViewHolder>() {
     override fun getItemCount(): Int = items.size
 
     override fun getItemViewType(position: Int): Int {
-        if (items[position].tags.isNotEmpty()) return VIEW_ITEM_TWO_TYPE else return VIEW_ITEM_ONE_TYPE
+        if (items[position].tags.isNotEmpty()) return VIEW_TYPE_ITEM_TWO else return VIEW_TYPE_ITEM_ONE
     }
 }

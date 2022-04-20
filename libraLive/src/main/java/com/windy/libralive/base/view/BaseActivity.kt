@@ -3,21 +3,24 @@ package com.windy.libralive.base.view
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.os.PersistableBundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
 import org.jetbrains.annotations.NotNull
 
 abstract class BaseActivity : AppCompatActivity() {
+    var TAG = BaseActivity::class.java.simpleName
 
     private lateinit var viewModelProvider: ViewModelProvider;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lifecycle.addObserver(object: LifecycleEventObserver {
+        lifecycle.addObserver(object : LifecycleEventObserver {
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
 //                TODO("Not yet implemented")
             }
-        } )
+        })
     }
 
     /**
@@ -53,9 +56,33 @@ abstract class BaseActivity : AppCompatActivity() {
         return viewModelProvider
     }
 
+    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        super.onCreate(savedInstanceState, persistentState)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart: ")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume: ")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause: ")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop: ")
+    }
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d(TAG, "onDestroy: ")
     }
 }
 

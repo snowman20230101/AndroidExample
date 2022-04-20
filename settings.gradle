@@ -14,7 +14,6 @@ dependencyResolutionManagement {
 }
 rootProject.name = "AndroidExample"
 include ':libraLive'
-//include ':BreakpadExample'
-//include ':jni-libs'
-//include ':okhttp-java'
-//include ':okhttp3-java'
+include ':BreakpadExample'
+include ':jni-libs'
+include ':okhttp3-java'

@@ -28,8 +28,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private static final String TAG = MainActivity.class.getSimpleName();
+public class MainActivity extends BaseActivity implements View.OnClickListener {
+
     private Button btnAnr;
     private Button btnNativeCrash;
     private Button btnHandler;
@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        TAG = MainActivity.class.getSimpleName();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
         Log.i(TAG, "onCreate: " + getStringFromJni());
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnHandler.setOnClickListener(this);
 
         findViewById(R.id.btn_gameView).setOnClickListener(this);
+        findViewById(R.id.btn_start_act).setOnClickListener(this);
 
         initBreakpad();
     }
@@ -93,12 +95,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.btn_gameView:
-                startActivity(new Intent(MainActivity.this, GameActivity.class));
+                Intent in = new Intent(MainActivity.this, GameActivity.class);
+                in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(in);
                 break;
 
             case R.id.btn_handler:
 //                testHandler();
                 getOKHttp();
+                break;
+            case R.id.btn_start_act:
+                break;
 
             default:
                 break;

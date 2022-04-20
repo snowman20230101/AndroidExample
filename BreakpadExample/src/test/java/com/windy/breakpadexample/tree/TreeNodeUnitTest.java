@@ -18,6 +18,34 @@ public class TreeNodeUnitTest {
         System.out.println();
     }
 
+    @Test
+    public void testInger() {
+        Integer i = 9;
+        System.out.println(Integer.toString(1, 2));
+        System.out.println(Integer.toString(2, 2));
+        System.out.println(Integer.toString(3, 2));
+        System.out.println(Integer.toString(4, 2));
+        System.out.println(Integer.toString(5, 2));
+        System.out.println(Integer.toString(6, 2));
+        System.out.println(Integer.toString(7, 2));
+        System.out.println(Integer.toString(8, 2));
+        System.out.println(Integer.toString(9, 2));
+
+        System.out.println("sb=" + test(8));
+    }
+
+
+    public String test(int x) {
+        StringBuilder sb = new StringBuilder();
+        while (x > 0) {
+            int m = x % 2;
+            sb.append(m);
+            x = x / 2;
+        }
+
+        return sb.toString();
+    }
+
     /**
      * 二叉树前序遍历 -> 跟节点，左子树，右子树
      */
