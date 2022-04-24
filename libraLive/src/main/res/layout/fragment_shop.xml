@@ -24,6 +24,7 @@
             android:layout_marginEnd="8dp"
             android:text="@{vm.text}"
             android:textAlignment="center"
+            android:onClick="startTest"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

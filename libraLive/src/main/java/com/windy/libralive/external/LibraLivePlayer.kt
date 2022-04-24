@@ -4,7 +4,7 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 
-class LibraLivePlayer(val dataSource: String) : SurfaceHolder.Callback {
+class LibraLivePlayer(private val dataSource: String) : SurfaceHolder.Callback {
 
     lateinit var holder: SurfaceHolder
     lateinit var listener: OnPrepareListener

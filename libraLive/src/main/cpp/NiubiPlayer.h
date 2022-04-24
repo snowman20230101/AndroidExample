@@ -2,20 +2,20 @@
 // Created by windy on 2021/12/22.
 //
 
-#ifndef LIBRALIVE_MANIUPLAYER_H
-#define LIBRALIVE_MANIUPLAYER_H
+#ifndef LIBRALIVE_NIUBIPLAYER_H
+#define LIBRALIVE_NIUBIPLAYER_H
 
 #include "CommonInclude.h"
 #include "JavaCallHelper.h"
 #include "VideoChannel.h"
 #include "AudioChannel.h"
 
-class MaNiuPlayer {
+class NiubiPlayer {
 
 public:
-    MaNiuPlayer(const char *source, JavaCallHelper *helper);
+    NiubiPlayer(const char *source, JavaCallHelper *helper);
 
-    ~MaNiuPlayer();
+    ~NiubiPlayer();
 
     void prepare();
 
@@ -41,7 +41,7 @@ public:
     // java 调用
     JavaCallHelper *callHelper;
 
-    int isPlaying {0};
+    int isPlaying{0};
 
     AudioChannel *audioChannel = NULL;
     VideoChannel *videoChannel = NULL;
@@ -51,4 +51,4 @@ public:
 };
 
 
-#endif //LIBRALIVE_MANIUPLAYER_H
+#endif //LIBRALIVE_NIUBIPLAYER_H

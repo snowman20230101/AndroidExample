@@ -4,6 +4,7 @@ import com.windy.libralive.databinding.ActivityMainBinding;
 
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -12,6 +13,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.windy.libralive.R
 import com.windy.libralive.base.view.BaseActivity
+import com.windy.libralive.external.NativeCaseTesting
 
 class MainActivity : BaseActivity() {
     private var _binding: ActivityMainBinding? = null
@@ -20,6 +22,7 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate: $NativeCaseTesting.stringFromJNI()")
 
         viewModel =
             ViewModelProvider(this, defaultViewModelProviderFactory)[MainVewModel::class.java]

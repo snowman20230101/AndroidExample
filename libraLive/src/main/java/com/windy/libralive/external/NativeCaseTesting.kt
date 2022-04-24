@@ -25,5 +25,7 @@ class NativeCaseTesting {
         fun test() {
             val i = 5 / 0
         }
+
+
     }
 }

@@ -2,7 +2,7 @@
 // Created by windy on 2022/3/18.
 //
 
-#include "MaNiuPlayer.h"
+#include "NiubiPlayer.h"
 #include "CommonInclude.h"
 
 #include <android/bitmap.h>
@@ -13,7 +13,7 @@ extern JavaVM *javaVM;
 ANativeWindow *window = NULL;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-MaNiuPlayer *player = NULL;
+NiubiPlayer *player = NULL;
 JavaCallHelper *javaCallHelper;
 
 /**
@@ -29,7 +29,7 @@ static void com_windy_libralive_LibraPlayer_native_prepare(JNIEnv *env, jobject 
                                                            jstring data_source) {
     const char *source = env->GetStringUTFChars(data_source, 0);
     javaCallHelper = new JavaCallHelper(javaVM, env, object);
-    player = new MaNiuPlayer(source, javaCallHelper);
+    player = new NiubiPlayer(source, javaCallHelper);
     player->setRenderFrameCallBack(renderFrameCallBack);
     player->prepare();
     env->ReleaseStringUTFChars(data_source, source);

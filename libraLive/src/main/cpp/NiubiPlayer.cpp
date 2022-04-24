@@ -3,7 +3,7 @@
 //
 
 
-#include "MaNiuPlayer.h"
+#include "NiubiPlayer.h"
 
 void *task_init_prepare(void *obj);
 
@@ -11,21 +11,21 @@ void *task_init_start(void *obj);
 
 void *task_init_stop(void *obj);
 
-MaNiuPlayer::MaNiuPlayer(const char *source, JavaCallHelper *helper) {
+NiubiPlayer::NiubiPlayer(const char *source, JavaCallHelper *helper) {
     this->callHelper = helper;
     this->dataSource = new char[strlen(source) + 1];
     strcpy(this->dataSource, source);
 }
 
-MaNiuPlayer::~MaNiuPlayer() {
+NiubiPlayer::~NiubiPlayer() {
     DELETE(this->dataSource)
 }
 
-void MaNiuPlayer::prepare() {
+void NiubiPlayer::prepare() {
     pthread_create(&pid_pre, 0, task_init_prepare, this);
 }
 
-void MaNiuPlayer::init_prepare() {
+void NiubiPlayer::init_prepare() {
     avformat_network_init();
 
     // TODO 第一步：打开媒体地址（文件路径 、 直播地址）
@@ -117,7 +117,7 @@ void MaNiuPlayer::init_prepare() {
 
             int fps = av_q2d(avg_frame_rate);
 
-            LOGI("MaNiuPlayer::init_prepare() AVStream w=%d, h=%d, fps=%d", avCodecContext->width,
+            LOGI("NiubiPlayer::init_prepare() AVStream w=%d, h=%d, fps=%d", avCodecContext->width,
                  avCodecContext->height, fps);
 
             videoChannel = new VideoChannel(i, avCodecContext, time_base, fps);
@@ -135,13 +135,13 @@ void MaNiuPlayer::init_prepare() {
         return;
     }
 
-    LOGD("MaNiuPlayer::init_prepare() finish");
+    LOGD("NiubiPlayer::init_prepare() finish");
 
     // TODO 第十二步：要么有音频，要么有视频，要么音视频都有
     callHelper->onPrepare(THREAD_CHILD);
 }
 
-void MaNiuPlayer::start() {
+void NiubiPlayer::start() {
     isPlaying = 1;
 
     if (videoChannel) {
@@ -157,8 +157,8 @@ void MaNiuPlayer::start() {
     pthread_create(&pid_play, 0, task_init_start, this);
 }
 
-void MaNiuPlayer::init_start() {
-    LOGD("MaNiuPlayer::init_start() isPlaying=%d", isPlaying);
+void NiubiPlayer::init_start() {
+    LOGD("NiubiPlayer::init_start() isPlaying=%d", isPlaying);
 
     int ret;
     while (isPlaying) {
@@ -221,18 +221,18 @@ void MaNiuPlayer::init_start() {
     audioChannel->stop();
 }
 
-void MaNiuPlayer::setRenderFrameCallBack(RenderFrameCallback renderFrameCallback) {
+void NiubiPlayer::setRenderFrameCallBack(RenderFrameCallback renderFrameCallback) {
     this->renderFrameCallBack = renderFrameCallback;
 }
 
-void MaNiuPlayer::stop() {
+void NiubiPlayer::stop() {
     this->isPlaying = 0;
     this->callHelper = 0;
     pthread_create(&pid_stop, 0, task_init_stop, this);
 }
 
 void *task_init_prepare(void *obj) {
-    MaNiuPlayer *player = static_cast<MaNiuPlayer *>(obj);
+    NiubiPlayer *player = static_cast<NiubiPlayer *>(obj);
     if (player) {
         player->init_prepare();
     }
@@ -240,7 +240,7 @@ void *task_init_prepare(void *obj) {
 }
 
 void *task_init_start(void *obj) {
-    MaNiuPlayer *player = static_cast<MaNiuPlayer *>(obj);
+    NiubiPlayer *player = static_cast<NiubiPlayer *>(obj);
     if (player) {
         player->init_start();
     }
@@ -249,9 +249,9 @@ void *task_init_start(void *obj) {
 }
 
 void *task_init_stop(void *obj) {
-    LOGE("MaNiuPlayer task_stop()");
+    LOGE("NiubiPlayer task_stop()");
 
-    MaNiuPlayer *player = static_cast<MaNiuPlayer *>(obj);
+    NiubiPlayer *player = static_cast<NiubiPlayer *>(obj);
 
     if (player) {
         // 等待prepare结束

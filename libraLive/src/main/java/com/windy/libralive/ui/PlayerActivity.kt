@@ -6,16 +6,17 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Window
 import android.view.WindowManager
+import android.widget.Toast
+import androidx.databinding.DataBindingUtil
+import com.windy.libralive.R
 
 import com.windy.libralive.base.view.BaseActivity
-//import com.windy.libralive.databinding.ActivityPlayerBinding
+import com.windy.libralive.databinding.ActivityPlayerBinding
 import com.windy.libralive.external.LibraLivePlayer
 
 class PlayerActivity : BaseActivity() {
 
-    private val TAG: String? = PlayerActivity::class.simpleName
-
-//    lateinit var binding: ActivityPlayerBinding
+    private lateinit var binding: ActivityPlayerBinding
     lateinit var player: LibraLivePlayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,29 +26,26 @@ class PlayerActivity : BaseActivity() {
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
-//        binding = ActivityPlayerBinding.inflate(layoutInflater)
-//        hideSystemUI()
-//        setContentView(binding.root)
-//
-//        val stringExtra = intent.getStringExtra("url")
-//        Log.d(TAG, "onCreate: $stringExtra")
-//
-//        player = LibraLivePlayer(stringExtra!!)
-//        player.setSurfaceView(binding.surfaceView)
-//        player.setOnPrepareListener(object : LibraLivePlayer.OnPrepareListener {
-//            override fun onPrepare() {
-//                runOnUiThread(object : Runnable {
-//                    override fun run() {
-//                        Toast.makeText(this@PlayerActivity, "开始播放", Toast.LENGTH_SHORT).show()
-//                    }
-//                })
-//
-//                player.start()
-//            }
-//        })
-//
-//        binding = ActivityPlayerBinding.inflate(layoutInflater);
 
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_player)
+        hideSystemUI()
+
+        val stringExtra = intent.getStringExtra("url")
+        Log.d(TAG, "onCreate: $stringExtra")
+
+        player = LibraLivePlayer(stringExtra!!)
+        player.setSurfaceView(binding.surfaceView)
+        player.setOnPrepareListener(object : LibraLivePlayer.OnPrepareListener {
+            override fun onPrepare() {
+                runOnUiThread(object : Runnable {
+                    override fun run() {
+                        Toast.makeText(this@PlayerActivity, "开始播放", Toast.LENGTH_SHORT).show()
+                    }
+                })
+
+                player.start()
+            }
+        })
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -60,8 +58,8 @@ class PlayerActivity : BaseActivity() {
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
-//        setContentView(binding.getRoot());
-//        player.setSurfaceView(binding.surfaceView)
+        setContentView(binding.getRoot());
+        player.setSurfaceView(binding.surfaceView)
     }
 
     override fun onResume() {

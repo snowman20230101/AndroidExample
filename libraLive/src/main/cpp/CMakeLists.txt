@@ -7,7 +7,7 @@ set(RTMP ${CMAKE_SOURCE_DIR}/rtmp)
 set(ffmpeg ${CMAKE_SOURCE_DIR}/ffmpeg)
 
 # 引入c/c++编译源文件
-file(GLOB source_file *.cpp)
+file(GLOB source_file *.cpp NiubiPlayer.cpp)
 
 # 引入头文件
 include_directories(${CMAKE_SOURCE_DIR})
