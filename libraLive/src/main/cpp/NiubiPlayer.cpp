@@ -35,6 +35,10 @@ void NiubiPlayer::init_prepare() {
 
     AVDictionary *options = NULL;
     av_dict_set(&options, "timeout", "50000", 0);
+    av_dict_set(&options, "buffer_size", "1024000", 0); // 设置缓存大小,1080p可将值跳到最大
+    av_dict_set(&options, "rtsp_transport", "tcp", 0); // 以tcp的方式打开,
+    av_dict_set(&options, "stimeout", "5000000", 0); // 设置超时断开链接时间，单位us
+    av_dict_set(&options, "max_delay", "500000", 0); // 设置最大时延
 
     // 1、打开媒体地址(文件地址、直播地址) AVFormatContext  包含了 视频的 信息(宽、高等)
     /**
@@ -43,14 +47,13 @@ void NiubiPlayer::init_prepare() {
      * 3.输入的封装格式：一般是让ffmpeg自己去检测，所以给了一个0
      * 4.参数
      */
-    int ret = avformat_open_input(&this->formatContext, this->dataSource, nullptr, &options);
+    int ret = avformat_open_input(&this->formatContext, this->dataSource, 0, &options);
 
-    // avformat_close_input(&this->formatContext);
-
-    // @@@ 注意：字典使用过后，一定要去释放
+    // TODO 注意：字典使用过后，一定要去释放
     av_dict_free(&options); // 释放字典
 
     if (ret != 0) {
+        releaseFormatContext();
         LOGE("打开媒体失败:%s", av_err2str(ret));
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_OPEN_URL);
         return;
@@ -185,14 +188,10 @@ void NiubiPlayer::init_start() {
             // stream_index 这一个流的一个序号
             if (audioChannel && packet->stream_index == audioChannel->id) {
                 // 如果他们两 相等 说明是音频  音频包
-
-                // 未解码的 音频数据包 加入到队列
                 audioChannel->packets.push(packet);
 
             } else if (videoChannel && packet->stream_index == videoChannel->id) {
                 // 如果他们两 相等 说明是视频  视频包
-
-                // 未解码的 视频数据包 加入到队列
                 videoChannel->packets.push(packet);
             }
         } else if (ret == AVERROR_EOF) {
@@ -205,9 +204,7 @@ void NiubiPlayer::init_start() {
             // 为什么这里要让它继续循环 而不是sleep
             // 如果是做直播 ，可以sleep
             // 如果要支持点播(播放本地文件） seek 后退
-
             LOGD("读取完成 但是可能还没播放完");
-
         } else {
             // 代表失败了，有问题
             LOGD("代表失败了，有问题");
@@ -229,6 +226,14 @@ void NiubiPlayer::stop() {
     this->isPlaying = 0;
     this->callHelper = 0;
     pthread_create(&pid_stop, 0, task_init_stop, this);
+}
+
+void NiubiPlayer::releaseFormatContext() {
+    if (this->formatContext) {
+        avformat_close_input(&this->formatContext);
+        avformat_free_context(this->formatContext);
+        this->formatContext = nullptr;
+    }
 }
 
 void *task_init_prepare(void *obj) {
@@ -263,13 +268,8 @@ void *task_init_stop(void *obj) {
         DELETE(player->videoChannel)
         DELETE(player->audioChannel)
 
-        // 这时候释放就不会出现问题了
-        if (player->formatContext) {
-            // 先关闭读取 (关闭fileintputstream)
-            avformat_close_input(&player->formatContext);
-            avformat_free_context(player->formatContext);
-            player->formatContext = 0;
-        }
+        // 释放封装格式上下文
+        player->releaseFormatContext();
 
         DELETE(player)
     }

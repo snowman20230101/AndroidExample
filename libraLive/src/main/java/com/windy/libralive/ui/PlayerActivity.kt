@@ -27,6 +27,8 @@ class PlayerActivity : BaseActivity() {
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
 
+        supportActionBar?.hide()
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_player)
         hideSystemUI()
 

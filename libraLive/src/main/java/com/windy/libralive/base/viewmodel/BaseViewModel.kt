@@ -10,7 +10,6 @@ abstract class BaseViewModel : ViewModel() {
 
     protected open var modelClassName: String = BaseViewModel::class.java.simpleName
 
-
     /**
      *
      */

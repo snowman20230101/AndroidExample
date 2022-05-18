@@ -9,8 +9,11 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.windy.libralive.R
 import com.windy.libralive.base.view.BaseFragment
+import com.windy.libralive.data.model.home.UserBean
 import com.windy.libralive.databinding.FragmentShopBinding
+import com.windy.libralive.ui.NetDialog
 import com.windy.libralive.ui.PlayerActivity
+import java.io.File
 
 class ShopFragment : BaseFragment() {
 
@@ -44,18 +47,30 @@ class ShopFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.textHome.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View?) {
-                val intent = Intent(activity, PlayerActivity::class.java)
-                intent.putExtra(
-                    "url",
-                    "rtsp://admin:hik123456@10.60.193.99:554/Streaming/Channels/501?transportmode=unicast"
-                )
-                startActivity(intent)
-            }
-        });
-    }
+        binding.textHome.setOnClickListener {
+            val intent = Intent(activity, PlayerActivity::class.java)
+            val file = File(activity?.getExternalFilesDir(""), "haoshengyin_4.mp4")
+            intent.putExtra(
+                "url",
+                //                    "rtsp://admin:hik123456@10.60.193.99:554/Streaming/Channels/501?transportmode=unicast"
+                file.absolutePath
 
+            )
+            startActivity(intent)
+        }
+
+        binding.loginTestBtn.setOnClickListener {
+            viewModel.login("zhenchengbinbin@163.com", "zhang2281060*")
+        }
+
+        binding.loginTestBtn2.setOnClickListener {
+            viewModel.login(UserBean("zhenchengbinbin@163.com", "zhang2281060*"))
+        }
+
+        binding.loginTestBtn3.setOnClickListener {
+            NetDialog(requireActivity()).show()
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

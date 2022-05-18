@@ -29,6 +29,11 @@ public:
 
     void setRenderFrameCallBack(RenderFrameCallback renderFrameCallback);
 
+    /**
+     * 释放封装格式上下文
+     */
+    void releaseFormatContext();
+
 public:
     // 线程
     pthread_t pid_pre;

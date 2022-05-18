@@ -1,8 +1,9 @@
 package com.windy.libralive.ext
 
 import android.util.Log
+import com.windy.libralive.BuildConfig
 
-private const val debug: Boolean = false
+private var debug: Boolean = BuildConfig.DEBUG
 private const val TAG = "Logger:"
 
 fun d(msg: String) {

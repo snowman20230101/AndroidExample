@@ -15,7 +15,6 @@ abstract class BaseBindingAdapter<Model, ViewBinding : ViewDataBinding>(
     protected open val context: Context
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-
     val mList = ArrayList<Model>()
 
     /**
@@ -31,7 +30,7 @@ abstract class BaseBindingAdapter<Model, ViewBinding : ViewDataBinding>(
         val binding: ViewBinding? = DataBindingUtil.getBinding<ViewBinding>(holder.itemView)
         val model = mList[position]
         onBindItem(model, binding!!, holder, position)
-        binding!!.executePendingBindings() // 计算挂起的绑定，更新任何将表达式绑定到修改过的变量的视图。这必须在UI线程上运行。
+        binding.executePendingBindings() // 计算挂起的绑定，更新任何将表达式绑定到修改过的变量的视图。这必须在UI线程上运行。
     }
 
     /**
