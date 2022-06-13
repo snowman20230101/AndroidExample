@@ -1,5 +1,6 @@
 package com.windy.libralive.ui
 
+import android.media.projection.MediaProjectionManager
 import com.windy.libralive.databinding.ActivityMainBinding;
 
 import android.os.Bundle
@@ -22,7 +23,6 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate: $NativeCaseTesting.stringFromJNI()")
 
         viewModel =
             ViewModelProvider(this, defaultViewModelProviderFactory)[MainVewModel::class.java]
@@ -30,6 +30,8 @@ class MainActivity : BaseActivity() {
         _binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
         binding.vm = viewModel
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
+
+//        MediaProjectionManager
 
         val topLevelDestinationIds = setOf<Int>(
             R.id.navigation_home,

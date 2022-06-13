@@ -12,6 +12,7 @@ extern int register_com_windy_libralive_LibraPlayer(JNIEnv *env);
  */
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     LOGI("JNI_OnLoad() ");
+    log("TEST");
 
     JNIEnv *env = nullptr;
     jint ret = vm->GetEnv((void **) &env, JNI_VERSION_1_6);

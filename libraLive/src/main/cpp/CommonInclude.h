@@ -54,6 +54,32 @@ extern "C" {
 // 没有音视频
 #define FFMPEG_NO_MEDIA 8
 
+#define COCOS2D_DEBUG 1
+
+
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+#define CC_FORMAT_PRINTF(formatPos, argPos) __attribute__((__format__(printf, formatPos, argPos)))
+#elif defined(__has_attribute)
+#if __has_attribute(format)
+#define CC_FORMAT_PRINTF(formatPos, argPos) __attribute__((__format__(printf, formatPos, argPos)))
+#endif // __has_attribute(format)
+#else
+#define CC_FORMAT_PRINTF(formatPos, argPos)
+#endif
+
+#if COCOS2D_DEBUG == 1
+#define CCLOG(format, ...)      cocos2d::log(format, ##__VA_ARGS__)
+#define CCLOGERROR(format, ...)  cocos2d::log(format, ##__VA_ARGS__)
+#define CCLOGINFO(format, ...)   do {} while (0)
+#define CCLOGWARN(...) __CCLOGWITHFUNCTION(__VA_ARGS__)
+#endif // COCOS2D_DEBUG
+
+
+static const int MAX_LOG_LENGTH = 16 * 1024;
+
+void log(const char *format, ...) CC_FORMAT_PRINTF(1, 2);
+
+
 class CommonInclude {
 public:
     CommonInclude();

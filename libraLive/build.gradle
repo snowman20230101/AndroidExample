@@ -59,7 +59,7 @@ android {
     sourceSets {
         main {
             res {
-                srcDirs 'src/main/res', 'src/main/res/navigation', 'src/main/res/menu', 'src/main/res/anim'
+                srcDirs 'src/main/res', 'src/main/res/navigation', 'src/main/res/menu', 'src/main/res/anim', 'src/main/res/raw'
             }
         }
     }
@@ -99,8 +99,6 @@ dependencies {
 
     // 工具类
     implementation 'com.blankj:utilcodex:1.30.6'
-
-    implementation 'com.okay.client_app:lib_trtcsdk:1.0.0.51'
 
     // RxAndroid
 //    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'

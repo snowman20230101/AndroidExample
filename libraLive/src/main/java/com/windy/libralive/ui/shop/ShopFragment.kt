@@ -7,10 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import com.blankj.utilcode.util.ToastUtils
 import com.windy.libralive.R
 import com.windy.libralive.base.view.BaseFragment
 import com.windy.libralive.data.model.home.UserBean
 import com.windy.libralive.databinding.FragmentShopBinding
+import com.windy.libralive.ui.CameraActivity
 import com.windy.libralive.ui.NetDialog
 import com.windy.libralive.ui.PlayerActivity
 import java.io.File
@@ -52,8 +54,8 @@ class ShopFragment : BaseFragment() {
             val file = File(activity?.getExternalFilesDir(""), "haoshengyin_4.mp4")
             intent.putExtra(
                 "url",
-                //                    "rtsp://admin:hik123456@10.60.193.99:554/Streaming/Channels/501?transportmode=unicast"
-                file.absolutePath
+                "rtsp://admin:hik123456@10.60.193.99:554/Streaming/Channels/501?transportmode=unicast"
+//                file.absolutePath
 
             )
             startActivity(intent)
@@ -68,7 +70,9 @@ class ShopFragment : BaseFragment() {
         }
 
         binding.loginTestBtn3.setOnClickListener {
-            NetDialog(requireActivity()).show()
+//            NetDialog(requireActivity()).show()
+//            ToastUtils.showShort("")
+            startActivity(Intent(activity, CameraActivity::class.java))
         }
     }
 

@@ -78,27 +78,4 @@ class PlayerActivity : BaseActivity() {
         super.onDestroy()
         player.release()
     }
-
-    private fun hideSystemUI() {
-        if (Build.VERSION.SDK_INT >= 19) {
-            Log.d(TAG, "hideSystemUI: ")
-//            this.binding.surfaceView.setSystemUiVisibility(
-//                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-//                        or View.SYSTEM_UI_FLAG_FULLSCREEN
-//                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-//            )
-
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-            );
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
-            );
-        }
-    }
 }

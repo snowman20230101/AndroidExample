@@ -17,6 +17,9 @@ Java_com_windy_libralive_external_NativeCaseTesting_00024Companion_stringFromJNI
 
     LOGD("JNI VERSION:%d, rtmpVersion=%d", envVersion, rtmpVersion);
 
+//    cocos2d::CCLOG("", "");
+
+
     /**
      * 打印版本
      */

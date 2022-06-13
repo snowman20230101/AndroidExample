@@ -2,9 +2,11 @@ package com.windy.libralive.base.view
 
 import android.app.Activity
 import android.app.Application
+import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
 import org.jetbrains.annotations.NotNull
@@ -18,7 +20,6 @@ abstract class BaseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 //        lifecycle.addObserver(object : LifecycleEventObserver {
 //            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-////                TODO("Not yet implemented")
 //            }
 //        })
     }
@@ -83,6 +84,29 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy: ")
+    }
+
+    protected fun hideSystemUI() {
+        if (Build.VERSION.SDK_INT >= 19) {
+            Log.d(TAG, "hideSystemUI: ")
+//            this.binding.surfaceView.setSystemUiVisibility(
+//                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+//                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//            )
+
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+            );
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+            );
+        }
     }
 }
 
