@@ -47,7 +47,7 @@ void NiubiPlayer::init_prepare() {
      * 3.输入的封装格式：一般是让ffmpeg自己去检测，所以给了一个0
      * 4.参数
      */
-    int ret = avformat_open_input(&this->formatContext, this->dataSource, 0, &options);
+    int ret = avformat_open_input(&this->formatContext, this->dataSource, 0, 0);
 
     // TODO 注意：字典使用过后，一定要去释放
     av_dict_free(&options); // 释放字典
@@ -111,6 +111,7 @@ void NiubiPlayer::init_prepare() {
         AVRational time_base = avStream->time_base;
 
         LOGE("视频流时间基 分子=%d, 分母=%d", time_base.num, time_base.den); // 视频流时间基 分子=1, 分母=25000
+        av_dump_format(this->formatContext, 0, this->dataSource, 0);
 
         // TODO 第十步：从编码器参数中获取流类型codec_type
         if (codecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {
@@ -259,10 +260,10 @@ void *task_init_stop(void *obj) {
     NiubiPlayer *player = static_cast<NiubiPlayer *>(obj);
 
     if (player) {
-        // 等待prepare结束
+        // 等待 prepare 结束
         pthread_join(player->pid_pre, 0);
 
-        // 保证 start线程结束
+        // 保证 start 线程结束
         pthread_join(player->pid_play, 0);
 
         DELETE(player->videoChannel)

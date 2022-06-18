@@ -20,15 +20,18 @@
 
 // ffmpeg 头文件
 extern "C" {
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libavfilter/avfilter.h"
-#include "libswscale/swscale.h"
-#include "libavutil/imgutils.h"
-#include <libavutil/ffversion.h>
-#include <libavutil/time.h>
-#include <libavcodec/jni.h>
-#include <libswresample/swresample.h>
+#include "libavcodec/avcodec.h" // 视频解码器
+#include "libavformat/avformat.h" // 封装格式
+#include "libavfilter/avfilter.h" // 滤镜
+#include "libswscale/swscale.h" // 视频缩放
+#include "libavutil/imgutils.h" // 图像处理
+#include <libavutil/ffversion.h> // verison
+#include <libavutil/time.h> // 时间基
+#include "libavutil/samplefmt.h" // 音频采样
+#include "libavutil/channel_layout.h" // 音频声道
+#include <libavcodec/jni.h> // jni
+#include <libswresample/swresample.h> // 音频从采样
+#include "libavutil/opt.h"
 }
 
 // 宏函数

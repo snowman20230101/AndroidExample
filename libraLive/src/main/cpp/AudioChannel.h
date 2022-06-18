@@ -33,6 +33,15 @@ public:
     int out_channels;
     int out_sample_size;
     int out_sample_rate;
+    int64_t max_dst_nb_samples;
+
+    // 输出定义
+    u_int8_t **dst_data = 0;
+    int dst_linesize = 0;
+    AVSampleFormat dst_sample_fmt = AV_SAMPLE_FMT_S16;
+    int64_t dst_nb_samples = 0;
+    int64_t src_nb_samples = 1024;
+
 private:
     // 线程ID
     pthread_t pid_audio_decode;

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal">
+
+    <LinearLayout
+        android:layout_width="172dp"
+        android:layout_height="@dimen/dp_36"
+        android:background="@drawable/window_dialog_parent_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/backBtn"
+            android:layout_width="@dimen/dp_72"
+            android:layout_height="@dimen/dp_28"
+            android:layout_marginStart="@dimen/dp_10"
+            android:layout_marginEnd="@dimen/dp_5"
+            android:layout_weight="1"
+            android:background="@drawable/window_dialog_left_white_bg"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/dp_10"
+                android:layout_height="@dimen/dp_10"
+                android:src="@mipmap/icon_control_panel_back" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="返回直播课"
+                android:textColor="#FF222222"
+                android:textSize="9sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/overLiveBtn"
+            android:layout_width="@dimen/dp_72"
+            android:layout_height="@dimen/dp_28"
+            android:layout_marginStart="@dimen/dp_5"
+            android:layout_marginEnd="@dimen/dp_10"
+            android:layout_weight="1"
+            android:background="@drawable/window_dialog_right_red_bg"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/dp_10"
+                android:layout_height="@dimen/dp_10"
+                android:layout_marginEnd="@dimen/dp_2"
+                android:src="@mipmap/icon_video_teacher_camera" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dp_2"
+                android:text="结束主讲"
+                android:textColor="@color/white"
+                android:textSize="9sp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -234,7 +234,7 @@ void VideoChannel::render() {
 
         // 计算 音频 和 视频的 差值
         double time_diff = videoTime - audioTime;
-        LOGE("time_diff=%f, videoTime=%f, audioTime=%f", time_diff, this->videoTime, audioTime);
+//        LOGE("time_diff=%f, videoTime=%f, audioTime=%f", time_diff, this->videoTime, audioTime);
 
         if (time_diff > 0) {
             // 说明：视频快一些，音频慢一些

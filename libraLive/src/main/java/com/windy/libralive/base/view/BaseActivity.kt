@@ -1,15 +1,22 @@
 package com.windy.libralive.base.view
 
+import android.Manifest
 import android.app.Activity
 import android.app.Application
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.provider.Settings
 import android.util.Log
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.*
 import org.jetbrains.annotations.NotNull
+
 
 abstract class BaseActivity : AppCompatActivity() {
     var TAG = BaseActivity::class.java.simpleName
@@ -18,6 +25,8 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate: Build.VERSION.SDK_INT = ${Build.VERSION.SDK_INT}")
+        checkPermission()
 //        lifecycle.addObserver(object : LifecycleEventObserver {
 //            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
 //            }
@@ -108,6 +117,115 @@ abstract class BaseActivity : AppCompatActivity() {
             );
         }
     }
+
+    protected open fun checkPermission(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val permissions: MutableList<String> = ArrayList()
+            // 写
+            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            ) {
+                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+            // 相机
+            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.CAMERA
+                )
+            ) {
+                permissions.add(Manifest.permission.CAMERA)
+            }
+            // 录音
+            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.RECORD_AUDIO
+                )
+            ) {
+                permissions.add(Manifest.permission.RECORD_AUDIO)
+            }
+            // 读
+            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+            ) {
+                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            // 悬浮
+            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.SYSTEM_ALERT_WINDOW
+                )
+            ) {
+                permissions.add(Manifest.permission.SYSTEM_ALERT_WINDOW)
+            }
+            // 悬浮
+            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.HIDE_OVERLAY_WINDOWS
+                )
+            ) {
+                permissions.add(Manifest.permission.HIDE_OVERLAY_WINDOWS)
+            }
+            if (permissions.size != 0) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    permissions.toTypedArray(),
+                    REQ_PERMISSION_CODE
+                )
+                return false
+            }
+        }
+        return true
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQ_PERMISSION_CODE -> {
+                for (ret in grantResults) {
+                    if (PackageManager.PERMISSION_GRANTED == ret) {
+                        grantedCount++
+                    }
+                }
+
+                Log.e(
+                    TAG,
+                    "onRequestPermissionsResult: grantedCount=$grantedCount , ${permissions.size}"
+                )
+
+                if (grantedCount == permissions.size) {
+                    onPermissionGranted()
+                } else {
+                    Toast.makeText(
+                        this,
+                        "用户没有允许需要的权限，加入通话失败",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                grantedCount = 0
+            }
+            else -> {}
+        }
+    }
+
+
+    companion object {
+        protected val REQ_PERMISSION_CODE = 0x1000
+    }
+
+    protected var grantedCount = 0
+
+    protected open fun onPermissionGranted() {
+
+    }
+
 }
 
 

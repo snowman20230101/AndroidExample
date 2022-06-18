@@ -9,57 +9,121 @@ void *audio_decode(void *args);
 
 void *audio_play(void *args);
 
+static int get_format_from_sample_fmt(const char **fmt,
+                                      enum AVSampleFormat sample_fmt) {
+    int i;
+    struct sample_fmt_entry {
+        enum AVSampleFormat sample_fmt;
+        const char *fmt_be, *fmt_le;
+    } sample_fmt_entries[] = {
+            {AV_SAMPLE_FMT_U8,  "u8",    "u8"},
+            {AV_SAMPLE_FMT_S16, "s16be", "s16le"},
+            {AV_SAMPLE_FMT_S32, "s32be", "s32le"},
+            {AV_SAMPLE_FMT_FLT, "f32be", "f32le"},
+            {AV_SAMPLE_FMT_DBL, "f64be", "f64le"},
+    };
+    *fmt = NULL;
+
+    for (i = 0; i < FF_ARRAY_ELEMS(sample_fmt_entries); i++) {
+        struct sample_fmt_entry *entry = &sample_fmt_entries[i];
+        if (sample_fmt == entry->sample_fmt) {
+            *fmt = AV_NE(entry->fmt_be, entry->fmt_le);
+            return 0;
+        }
+    }
+
+    fprintf(stderr,
+            "Sample format %s not supported as output format\n",
+            av_get_sample_fmt_name(sample_fmt));
+    return AVERROR(EINVAL);
+}
+
+/**
+ * Fill dst buffer with nb_samples, generated starting from t.
+ */
+static void fill_samples(double *dst, int nb_samples, int nb_channels, int sample_rate, double *t) {
+    int i, j;
+    double tincr = 1.0 / sample_rate, *dstp = dst;
+    const double c = 2 * M_PI * 440.0;
+
+    /* generate sin tone with 440Hz frequency and duplicated channels */
+    for (i = 0; i < nb_samples; i++) {
+        *dstp = sin(c * *t);
+        for (j = 1; j < nb_channels; j++)
+            dstp[j] = dstp[0];
+        dstp += nb_channels;
+        *t += tincr;
+    }
+}
+
 AudioChannel::AudioChannel(int id, AVCodecContext *avCodecContext, AVRational time_base)
         : BaseChannel(id, avCodecContext, time_base) {
     this->id = id;
     this->mAvCodecContext = avCodecContext;
     this->time_base = time_base;
 
-    // 播放的参数 必须固定，声卡要求（输出 音频重要参数，必须固定）
-    // 40000 输入   3000输入
-    // 输出必须规定，否则，声卡不同意
-
-
-    // 初始化 缓冲区 out_buffers
-    // 如何去定义缓冲区？
-    // 答：根据数据类型 44100  和  16bits  和  2声道
-
-    // 可以是写死的方式
-    // out_buffers_size = 44100 * 2 * 2;
-
-    out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO); // 声道
+    out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO); // 输出声道
     out_sample_size = av_get_bytes_per_sample(AV_SAMPLE_FMT_S16); // 输出缓冲区位数
     out_sample_rate = 44100; // 采样
 
-    // 2*44.1kHz*16bit=1.411Mbit/s
-    int out_buffers_size = out_sample_rate * out_sample_size * out_channels;
+//
+//    // 2*44.1kHz*16bit=1.411Mbit/s
+//    int out_buffers_size = out_sample_rate * out_sample_size * out_channels;
+//
+//    // 缓冲区是拿到三者  通道数 * 采用率 * s16
+//    out_buffers = static_cast<uint8_t *>(malloc(out_buffers_size)); // unsigned char*
+//    memset(out_buffers, 0, out_buffers_size);
 
-    // 缓冲区是拿到三者  通道数 * 采用率 * s16
-    out_buffers = static_cast<uint8_t *>(malloc(out_buffers_size)); // unsigned char*
-    memset(out_buffers, 0, out_buffers_size);
-
-    // 必须把 上面的配置 设置到 转换上下文
-    // swr_ctx = swr_alloc();
-    // 0 + 输出声道+ 输出采样位+输出采样率 + 输入的3个参数
-    swrContext = swr_alloc_set_opts(0,
+    // 申请上下文
+    swrContext = swr_alloc_set_opts(swrContext,
                                     AV_CH_LAYOUT_STEREO,
                                     AV_SAMPLE_FMT_S16,
                                     out_sample_rate,
-                                    mAvCodecContext->channel_layout,
+                                    1,
                                     mAvCodecContext->sample_fmt,
                                     mAvCodecContext->sample_rate,
                                     0,
                                     0
     );
 
-    // 初始化一下 转换上下文 目的：防止有 吃吃吃的声音
-    swr_init(swrContext);
+    // 初始化一下 转换上下文
+    int ret = swr_init(swrContext);
+    if (ret < 0) {
+        LOGE("Failed to initialize the swr_init context ret=%s", av_err2str(ret));
+    }
+
+    // converted input samples 转换输入样本
+    max_dst_nb_samples = dst_nb_samples = av_rescale_rnd(
+            src_nb_samples,
+            out_sample_rate,
+            mAvCodecContext->sample_rate,
+            AV_ROUND_UP
+    );
+
+    LOGE("AudioChannel: max_dst_nb_samples=%lld", max_dst_nb_samples);
+
+    // 输 出
+    av_samples_alloc_array_and_samples(
+            &dst_data,
+            &dst_linesize,
+            out_channels,
+            (int) dst_nb_samples,
+            dst_sample_fmt,
+            0
+    );
+
+    LOGE("AudioChannel: dst_linesize=%d", dst_linesize);
 }
 
 AudioChannel::~AudioChannel() {
     if (out_buffers) {
         free(out_buffers);
         out_buffers = 0;
+    }
+
+    if (dst_data) {
+        av_free(dst_data);
+        dst_data = 0;
     }
 }
 
@@ -163,37 +227,52 @@ int AudioChannel::getPcm() {
         return pcm_data_size;
     }
 
-    // 48000HZ 8位 =》 44100 16位
     // 重采样
-    // 假设我们输入了10个数据 ，swrContext转码器 这一次处理了8个数据
-    // 那么如果不加delays(上次没处理完的数据) , 积压
     int64_t delays = swr_get_delay(swrContext, frame->sample_rate);
 
-    // 将 nb_samples 个数据 由 sample_rate采样率转成 44100 后 返回多少个数据
-    // 10  个 48000 = nb 个 44100
-    // AV_ROUND_UP : 向上取整 1.1 = 2
-    int64_t max_samples = av_rescale_rnd(delays + frame->nb_samples,
-                                         out_sample_rate,
-                                         frame->sample_rate,
-                                         AV_ROUND_UP
+    // 转换输出
+    dst_nb_samples = av_rescale_rnd(
+            delays + frame->nb_samples,
+            out_sample_rate,
+            frame->sample_rate,
+            AV_ROUND_UP
     );
+
+    if (dst_nb_samples > max_dst_nb_samples) {
+        LOGE("AudioChannel::getPcm() 缓冲区变了，重新调整");
+        av_freep(&dst_data[0]);
+        int ret = av_samples_alloc(dst_data, &dst_linesize, out_channels, (int) dst_nb_samples,
+                                   dst_sample_fmt, 1);
+        if (ret < 0) {
+            LOGE("AudioChannel::getPcm() Error av_samples_alloc ...");
+        }
+
+        max_dst_nb_samples = dst_nb_samples;
+    }
 
     // 上下文+输出缓冲区+输出缓冲区能接受的最大数据量+输入数据+输入数据个数
     // 返回 每一个声道的输出数据个数
     int samples = swr_convert(swrContext,
-                              &out_buffers,
-                              max_samples,
+                              dst_data,
+                              (int) dst_nb_samples,
                               (const uint8_t **) frame->data,
                               frame->nb_samples
     );
 
-    // 获得   samples 个   * 2 声道 * 2字节（16位）
-    pcm_data_size = samples * out_sample_size * out_channels;
+    // 获取给定音频参数所需的缓冲区大小
+    pcm_data_size = av_samples_get_buffer_size(
+            &dst_linesize,
+            out_channels,
+            samples,
+            dst_sample_fmt,
+            1
+    );
 
-    // 获取 frame 的一个相对播放时间 （相对开始播放）
+    // 获得   samples 个   * 2 声道 * 2字节（16位）
+//    pcm_data_size = samples * out_sample_size * out_channels;
+
     // 获得 相对播放这一段数据的秒数
-    this->audioTime = frame->best_effort_timestamp * av_q2d(time_base); // frame->pts
-//    LOGE("     audioTime=%lld", frame->best_effort_timestamp);
+    this->audioTime = frame->best_effort_timestamp * av_q2d(time_base);
 
     releaseAvFrame(&frame);
 
@@ -206,7 +285,7 @@ void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     int dataSize = audioChannel->getPcm();
     if (dataSize > 0) {
         // 接收16位数据
-        (*bq)->Enqueue(bq, audioChannel->out_buffers, dataSize);
+        (*bq)->Enqueue(bq, *audioChannel->dst_data, dataSize);
     }
 }
 
