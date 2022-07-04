@@ -39,11 +39,9 @@ class PlayerActivity : BaseActivity() {
         player.setSurfaceView(binding.surfaceView)
         player.setOnPrepareListener(object : LibraLivePlayer.OnPrepareListener {
             override fun onPrepare() {
-                runOnUiThread(object : Runnable {
-                    override fun run() {
-                        Toast.makeText(this@PlayerActivity, "开始播放", Toast.LENGTH_SHORT).show()
-                    }
-                })
+                runOnUiThread {
+                    Toast.makeText(this@PlayerActivity, "开始播放", Toast.LENGTH_SHORT).show()
+                }
 
                 player.start()
             }

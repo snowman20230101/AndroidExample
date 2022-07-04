@@ -8,6 +8,9 @@
 #include <jni.h>
 
 #include <cstring>
+#include <cstdlib>
+#include <cstdio>
+#include <cstdint>
 #include "message_queue.h"
 
 #include <android/log.h>
@@ -32,6 +35,7 @@ extern "C" {
 #include <libavcodec/jni.h> // jni
 #include <libswresample/swresample.h> // 音频从采样
 #include "libavutil/opt.h"
+#include <libavutil/dict.h>
 }
 
 // 宏函数

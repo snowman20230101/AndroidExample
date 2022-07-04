@@ -36,9 +36,9 @@ public:
 
 public:
     // 线程
-    pthread_t pid_pre;
-    pthread_t pid_play;
-    pthread_t pid_stop;
+    pthread_t pid_pre{};
+    pthread_t pid_play{};
+    pthread_t pid_stop{};
 
     // 地址
     char *dataSource;
@@ -52,7 +52,7 @@ public:
     VideoChannel *videoChannel = NULL;
 
     AVFormatContext *formatContext = NULL;
-    RenderFrameCallback renderFrameCallBack;
+    RenderFrameCallback renderFrameCallBack{};
 };
 
 

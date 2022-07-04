@@ -67,6 +67,12 @@ void NiubiPlayer::init_prepare() {
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_FIND_STREAMS);
     }
 
+    fprintf(stdout, "dictionary count: %d\n", av_dict_count(this->formatContext->metadata));
+    AVDictionaryEntry *entry = nullptr;
+    while ((entry = av_dict_get(this->formatContext->metadata, "", entry, AV_DICT_IGNORE_SUFFIX))) {
+        fprintf(stdout, "key: %s, value: %s\n", entry->key, entry->value);
+    }
+
     // TODO 第三步：根据流信息，流的个数，循环查找， 音频流 视频流
     for (int i = 0; i < this->formatContext->nb_streams; ++i) {
         // TODO 第四步：获取媒体流（视频、音频） 从封装格式上下文获取流对象
@@ -119,7 +125,7 @@ void NiubiPlayer::init_prepare() {
             // 平均帧率 == 时间基
             AVRational avg_frame_rate = avStream->avg_frame_rate;
 
-            int fps = av_q2d(avg_frame_rate);
+            int fps = (int) av_q2d(avg_frame_rate);
 
             LOGI("NiubiPlayer::init_prepare() AVStream w=%d, h=%d, fps=%d", avCodecContext->width,
                  avCodecContext->height, fps);
@@ -194,6 +200,7 @@ void NiubiPlayer::init_start() {
             } else if (videoChannel && packet->stream_index == videoChannel->id) {
                 // 如果他们两 相等 说明是视频  视频包
                 videoChannel->packets.push(packet);
+                av_log2_16bit(1);
             }
         } else if (ret == AVERROR_EOF) {
             // 读取完成 但是可能还没播放完
