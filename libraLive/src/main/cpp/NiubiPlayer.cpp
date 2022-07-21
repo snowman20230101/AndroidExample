@@ -35,10 +35,12 @@ void NiubiPlayer::init_prepare() {
 
     AVDictionary *options = NULL;
     av_dict_set(&options, "timeout", "50000", 0);
-    av_dict_set(&options, "buffer_size", "1024000", 0); // 设置缓存大小,1080p可将值跳到最大
-    av_dict_set(&options, "rtsp_transport", "tcp", 0); // 以tcp的方式打开,
-    av_dict_set(&options, "stimeout", "5000000", 0); // 设置超时断开链接时间，单位us
-    av_dict_set(&options, "max_delay", "500000", 0); // 设置最大时延
+//    av_dict_set(&options, "buffer_size", "1024000", 0); // 设置缓存大小,1080p可将值跳到最大
+//    av_dict_set(&options, "rtsp_transport", "tcp", 0); // 以tcp的方式打开,
+//    av_dict_set(&options, "stimeout", "5000000", 0); // 设置超时断开链接时间，单位us
+//    av_dict_set(&options, "max_delay", "500000", 0); // 设置最大时延
+
+    LOGE("dataSource is %s", this->dataSource);
 
     // 1、打开媒体地址(文件地址、直播地址) AVFormatContext  包含了 视频的 信息(宽、高等)
     /**
@@ -47,7 +49,7 @@ void NiubiPlayer::init_prepare() {
      * 3.输入的封装格式：一般是让ffmpeg自己去检测，所以给了一个0
      * 4.参数
      */
-    int ret = avformat_open_input(&this->formatContext, this->dataSource, 0, 0);
+    int ret = avformat_open_input(&this->formatContext, this->dataSource, 0, &options);
 
     // TODO 注意：字典使用过后，一定要去释放
     av_dict_free(&options); // 释放字典
@@ -145,7 +147,7 @@ void NiubiPlayer::init_prepare() {
         return;
     }
 
-    LOGD("NiubiPlayer::init_prepare() finish");
+    LOGD("NiubiPlayer::init_prepare() successful.");
 
     // TODO 第十二步：要么有音频，要么有视频，要么音视频都有
     callHelper->onPrepare(THREAD_CHILD);
@@ -200,7 +202,7 @@ void NiubiPlayer::init_start() {
             } else if (videoChannel && packet->stream_index == videoChannel->id) {
                 // 如果他们两 相等 说明是视频  视频包
                 videoChannel->packets.push(packet);
-                av_log2_16bit(1);
+//                av_log2_16bit(1);
             }
         } else if (ret == AVERROR_EOF) {
             // 读取完成 但是可能还没播放完

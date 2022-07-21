@@ -49,6 +49,7 @@ VideoChannel::~VideoChannel() {
 }
 
 void VideoChannel::start() {
+    LOGD("VideoChannel::start");
     isPlaying = 1;
 
     frames.gotoWork();
@@ -60,6 +61,7 @@ void VideoChannel::start() {
 }
 
 void VideoChannel::stop() {
+    LOGD("VideoChannel::stop");
     isPlaying = 0;
 
     frames.backWork();

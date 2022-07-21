@@ -9,7 +9,7 @@ set(ffmpeg ${CMAKE_SOURCE_DIR}/ffmpeg)
 # 引入c/c++编译源文件
 file(GLOB source_file *.cpp
         ffmpeg/examples/decode_video.c
-        ffmpeg/examples/*.c
+#        ffmpeg/examples/*.c
         NiubiPlayer.cpp)
 
 # 引入头文件

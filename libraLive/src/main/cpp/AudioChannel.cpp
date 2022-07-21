@@ -128,6 +128,7 @@ AudioChannel::~AudioChannel() {
 }
 
 void AudioChannel::start() {
+    LOGE("AudioChannel::start()");
     isPlaying = 1;
 
     // 设置为播放状态
@@ -141,6 +142,7 @@ void AudioChannel::start() {
 }
 
 void AudioChannel::decode() {
+    LOGE("AudioChannel::decode()");
     AVPacket *packet = 0;
 
     while (isPlaying) {
