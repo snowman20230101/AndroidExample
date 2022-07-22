@@ -57,7 +57,7 @@ class ShopFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.textHome.setOnClickListener {
             val intent = Intent(activity, PlayerActivity::class.java)
-            val file = File(activity?.getExternalFilesDir(""), "haoshengyin_4.mp4")
+            val file = File(activity?.getExternalFilesDir(""), "Apologize.mp4")
             intent.putExtra(
                 "url",
 //                "rtsp://admin:hik123456@10.60.193.99:554/Streaming/Channels/501?transportmode=unicast"

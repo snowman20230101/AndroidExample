@@ -138,13 +138,13 @@ abstract class BaseActivity : AppCompatActivity() {
                 permissions.add(Manifest.permission.CAMERA)
             }
             // 录音
-            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.RECORD_AUDIO
-                )
-            ) {
-                permissions.add(Manifest.permission.RECORD_AUDIO)
-            }
+//            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+//                    this,
+//                    Manifest.permission.RECORD_AUDIO
+//                )
+//            ) {
+//                permissions.add(Manifest.permission.RECORD_AUDIO)
+//            }
             // 读
             if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
                     this,
@@ -154,21 +154,21 @@ abstract class BaseActivity : AppCompatActivity() {
                 permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
             // 悬浮
-            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.SYSTEM_ALERT_WINDOW
-                )
-            ) {
-                permissions.add(Manifest.permission.SYSTEM_ALERT_WINDOW)
-            }
-            // 悬浮
-            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.HIDE_OVERLAY_WINDOWS
-                )
-            ) {
-                permissions.add(Manifest.permission.HIDE_OVERLAY_WINDOWS)
-            }
+//            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+//                    this,
+//                    Manifest.permission.SYSTEM_ALERT_WINDOW
+//                )
+//            ) {
+//                permissions.add(Manifest.permission.SYSTEM_ALERT_WINDOW)
+//            }
+//            // 悬浮
+//            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+//                    this,
+//                    Manifest.permission.HIDE_OVERLAY_WINDOWS
+//                )
+//            ) {
+//                permissions.add(Manifest.permission.HIDE_OVERLAY_WINDOWS)
+//            }
             if (permissions.size != 0) {
                 ActivityCompat.requestPermissions(
                     this,
