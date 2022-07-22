@@ -54,8 +54,8 @@ class ShopFragment : BaseFragment() {
             val file = File(activity?.getExternalFilesDir(""), "haoshengyin_4.mp4")
             intent.putExtra(
                 "url",
-                "rtsp://admin:hik123456@10.60.193.99:554/Streaming/Channels/501?transportmode=unicast"
-//                file.absolutePath
+//                "rtsp://admin:hik123456@10.60.193.99:554/Streaming/Channels/501?transportmode=unicast"
+                file.absolutePath
 
             )
             startActivity(intent)
