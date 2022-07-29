@@ -2,7 +2,7 @@
 #include "CommonInclude.h"
 
 extern "C" {
-//#include <librtmp/rtmp.h>
+#include <librtmp/rtmp.h>
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -12,14 +12,11 @@ Java_com_windy_libralive_external_NativeCaseTesting_00024Companion_stringFromJNI
     std::string hello = "ffmpeg:" + version;
 
     jint envVersion = env->GetVersion();
-//    int rtmpVersion = RTMP_LibVersion();
-//    hello.append("\n rtmp:" + std::to_string(rtmpVersion));
+    int rtmpVersion = RTMP_LibVersion();
+    hello.append("\n rtmp:" + std::to_string(rtmpVersion));
 
-//    LOGD("JNI VERSION:%d, rtmpVersion=%d", envVersion, rtmpVersion);
+    LOGD("JNI VERSION:%d, rtmpVersion=%d", envVersion, rtmpVersion);
     LOGE("FFMPEG version= %s", av_version_info());
-
-//    cocos2d::CCLOG("", "");
-
 
     /**
      * 打印版本

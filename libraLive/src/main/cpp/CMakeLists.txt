@@ -2,20 +2,38 @@ cmake_minimum_required(VERSION 3.18.1)
 
 project("libralive")
 
-# 定义 rtmp,ffmpeg 总目录的变量
+# 定义 rtmp, ffmpeg 总目录的变量
 set(RTMP ${CMAKE_SOURCE_DIR}/rtmp)
 set(ffmpeg ${CMAKE_SOURCE_DIR}/ffmpeg)
 
 # 引入c/c++编译源文件
 file(GLOB source_file *.cpp
         ffmpeg/examples/decode_video.c
-#        ffmpeg/examples/*.c
-        NiubiPlayer.cpp)
+#        ffmpeg/examples/filtering_video.c
+#        ffmpeg/examples/filtering_audio.c
+#        ffmpeg/examples/filter_audio.c
+        player/BaseChannel.cpp
+        player/AudioChannel.cpp
+        player/VideoChannel.cpp
+        player/NiubiPlayer.cpp
+        player/render/VideoRender.cpp
+        player/render/OpenGLRender.cpp
+        platform/JavaCallHelper.cpp
+        common/CommonInclude.cpp
+        common/message_queue.cpp
+)
 
 # 引入头文件
-include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${RTMP}/include)
-include_directories(${ffmpeg}/include)
+include_directories(
+        ${ffmpeg}/include
+        ${RTMP}/include
+        ${CMAKE_SOURCE_DIR}/platform
+        ${CMAKE_SOURCE_DIR}/common
+        ${CMAKE_SOURCE_DIR}/util
+        ${CMAKE_SOURCE_DIR}/player
+        ${CMAKE_SOURCE_DIR}/player/render
+        ${CMAKE_SOURCE_DIR}/glm
+)
 
 # 指定rtmp里面的库文件目录（静态库）
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${RTMP}/libs/${CMAKE_ANDROID_ARCH_ABI}")
@@ -42,4 +60,6 @@ target_link_libraries(
         android
         jnigraphics
         OpenSLES
+#        EGL
+#        GLESv3
         ${log-lib})

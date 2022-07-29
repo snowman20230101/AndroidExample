@@ -62,8 +62,8 @@ class ShopFragment : BaseFragment() {
                 "url",
 //                "rtsp://admin:hik123456@10.60.193.99:554/Streaming/Channels/501?transportmode=unicast"
 //                "rtsp://admin:hik12345@10.60.157.213:554/Streaming/Channels/501?transportmode=unicast"
-//                "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"
-                file.absolutePath
+                "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"
+//                file.absolutePath
 
             )
             startActivity(intent)
