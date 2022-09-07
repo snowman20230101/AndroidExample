@@ -120,6 +120,14 @@ void renderFrameCallBack(uint8_t *src_data, int width, int height, int src_liine
     // 设置窗口属性
     ANativeWindow_setBuffersGeometry(window, width, height, WINDOW_FORMAT_RGBA_8888);
 
+    /**
+     * int32_t width; // 水平显示的像素
+     * int32_t height; // 垂直显示的像素
+     * int32_t format; // 缓冲区格式 WINDOW_FORMAT_*
+     * int32_t stride; // 缓冲区在内存中一行的像素，可能 >= width
+     * void* bits; // 实际位数
+     * uint32_t reserved[6]; // 不要碰
+     */
     ANativeWindow_Buffer windowBuffer; // 缓冲区
 
     if (ANativeWindow_lock(window, &windowBuffer, 0)) {

@@ -19,4 +19,8 @@ abstract class BaseViewModel : ViewModel() {
         super.onCleared()
         Log.d("BaseViewModel", "onCleared: $modelClassName")
     }
+
+    init {
+        Log.d("BaseViewModel", "init: $modelClassName")
+    }
 }

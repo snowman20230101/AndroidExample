@@ -25,7 +25,6 @@ class MediaCodecActivity : BaseActivity() {
         initView()
     }
 
-
    private fun initView() {
         binding.mediaCodecSurfaceV.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {

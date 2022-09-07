@@ -17,3 +17,9 @@ include ':libraLive'
 //include ':BreakpadExample'
 //include ':jni-libs'
 //include ':okhttp3-java'
+
+//include ':trtclib'
+//project(':trtclib').projectDir = file('/Users/windy/devlop/okay/trtc-lib/trtclib')
+
+//include ':ChatServiceV2'
+//project(':ChatServiceV2').projectDir = new File(settingsDir, './../../proj.android-studio/ChatServiceV2')

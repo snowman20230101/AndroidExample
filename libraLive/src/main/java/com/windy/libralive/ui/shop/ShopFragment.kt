@@ -16,6 +16,7 @@ import com.windy.libralive.R
 import com.windy.libralive.base.view.BaseFragment
 import com.windy.libralive.data.model.home.UserBean
 import com.windy.libralive.databinding.FragmentShopBinding
+import com.windy.libralive.ui.FirstActivity
 import com.windy.libralive.ui.MainActivity
 import com.windy.libralive.ui.MediaCodecActivity
 import com.windy.libralive.ui.PlayerActivity
@@ -41,7 +42,7 @@ class ShopFragment : BaseFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = DataBindingUtil.inflate<FragmentShopBinding>(
             inflater,
             R.layout.fragment_shop,
@@ -55,19 +56,8 @@ class ShopFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.textHome.setOnClickListener {
-            val intent = Intent(activity, PlayerActivity::class.java)
-            val file = File(activity?.getExternalFilesDir(""), "Apologize.mp4")
-            intent.putExtra(
-                "url",
-//                "rtsp://admin:hik123456@10.60.193.99:554/Streaming/Channels/501?transportmode=unicast"
-//                "rtsp://admin:hik12345@10.60.157.213:554/Streaming/Channels/501?transportmode=unicast"
-                "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"
-//                file.absolutePath
 
-            )
-            startActivity(intent)
-        }
+        initListener()
 
 //        windowManager = requireActivity().getSystemService(Context.WINDOW_SERVICE) as WindowManager
 //        floatView = requireActivity().layoutInflater.inflate(R.layout.window_dialog_base, null)
@@ -79,20 +69,34 @@ class ShopFragment : BaseFragment() {
 //        floatView?.findViewById<LinearLayout>(R.id.overLiveBtn)?.setOnClickListener {
 //            ToastUtils.showShort("退出直播")
 //        }
+    }
 
+    private fun initListener() {
+        // 播放器
+        binding.ffmpegPlayTest.setOnClickListener {
+            val intent = Intent(activity, PlayerActivity::class.java)
+            val file = File(activity?.getExternalFilesDir(""), "Apologize.mp4")
+            intent.putExtra(
+                "url",
+                "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"
+//                file.absolutePath
+
+            )
+            startActivity(intent)
+        }
+
+        // 测试登录
         binding.loginTestBtn.setOnClickListener {
             viewModel.login("zhenchengbinbin@163.com", "zhang2281060*")
         }
 
+        // ceshi 登录
         binding.loginTestBtn2.setOnClickListener {
             viewModel.login(UserBean("zhenchengbinbin@163.com", "zhang2281060*"))
         }
 
         binding.loginTestBtn3.setOnClickListener {
-//            NetDialog(requireActivity()).show()
-//            ToastUtils.showShort("")
-            startActivity(Intent(activity, MediaCodecActivity::class.java))
-//            showWindowT()
+            startActivity(Intent(activity, FirstActivity::class.java))
         }
     }
 

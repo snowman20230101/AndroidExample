@@ -12,15 +12,15 @@ file(GLOB source_file *.cpp
 #        ffmpeg/examples/filtering_video.c
 #        ffmpeg/examples/filtering_audio.c
 #        ffmpeg/examples/filter_audio.c
-        player/BaseChannel.cpp
-        player/AudioChannel.cpp
+        player/*.cpp
         player/VideoChannel.cpp
-        player/NiubiPlayer.cpp
-        player/render/VideoRender.cpp
-        player/render/OpenGLRender.cpp
-        platform/JavaCallHelper.cpp
-        common/CommonInclude.cpp
-        common/message_queue.cpp
+        player/render/*.cpp
+        platform/*.cpp
+        common/*.cpp
+        util/*.cpp
+        egl/*.cpp
+        looper/*.cpp
+#        egl/OffscreenSurface.cpp
 )
 
 # 引入头文件
@@ -33,6 +33,8 @@ include_directories(
         ${CMAKE_SOURCE_DIR}/player
         ${CMAKE_SOURCE_DIR}/player/render
         ${CMAKE_SOURCE_DIR}/glm
+        ${CMAKE_SOURCE_DIR}/egl
+        ${CMAKE_SOURCE_DIR}/looper
 )
 
 # 指定rtmp里面的库文件目录（静态库）
@@ -60,6 +62,6 @@ target_link_libraries(
         android
         jnigraphics
         OpenSLES
-#        EGL
-#        GLESv3
+        EGL
+        GLESv3
         ${log-lib})

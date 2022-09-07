@@ -17,20 +17,39 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.*
 import org.jetbrains.annotations.NotNull
 
-
 abstract class BaseActivity : AppCompatActivity() {
-    var TAG = BaseActivity::class.java.simpleName
+    protected open val TAG: String
+        get() = BaseActivity::class.java.simpleName
 
-    private lateinit var viewModelProvider: ViewModelProvider;
+    private lateinit var viewModelProvider: ViewModelProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate: Build.VERSION.SDK_INT = ${Build.VERSION.SDK_INT}")
         checkPermission()
-//        lifecycle.addObserver(object : LifecycleEventObserver {
-//            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-//            }
-//        })
+        lifecycle.addObserver(object : LifecycleEventObserver {
+            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+            }
+        })
+
+        hookViewModeStoreMap()
+    }
+
+    private fun hookViewModeStoreMap() {
+        val storeClass = ViewModelStore::class.java
+        val declaredField = storeClass.getDeclaredField("mMap")
+        declaredField.isAccessible = true
+        val mapObj = declaredField.get(viewModelStore)
+
+        val mapClass = mapObj::class.java
+        val sizeMethod = mapClass.getDeclaredMethod("size")
+        val size = sizeMethod.invoke(mapObj)
+        Log.d(TAG, "hookViewModeStoreMap: viewModel map size is $size")
+
+        val entrySetMethod = mapClass.getDeclaredMethod("keySet") // Set<K>
+        val keySetValues = entrySetMethod.invoke(mapObj)
+
+        Log.d(TAG, "hookViewModeStoreMap: valuesObj=$keySetValues")
     }
 
     /**
@@ -44,7 +63,7 @@ abstract class BaseActivity : AppCompatActivity() {
      */
     protected fun <T : ViewModel> createViewModel(
         @NotNull modelClass: Class<T>
-    ): T = getViewModelProvider().get(modelClass)
+    ): T = getViewModelProvider()[modelClass]
 
     /**
      * 检查
@@ -217,7 +236,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
 
     companion object {
-        protected val REQ_PERMISSION_CODE = 0x1000
+        protected const val REQ_PERMISSION_CODE = 0x1000
     }
 
     protected var grantedCount = 0

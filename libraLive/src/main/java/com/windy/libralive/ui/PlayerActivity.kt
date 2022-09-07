@@ -51,12 +51,12 @@ class PlayerActivity : BaseActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            getWindow().setFlags(
+            window.setFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager
                     .LayoutParams.FLAG_FULLSCREEN
             )
         } else {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
         setContentView(binding.getRoot());
         player.setSurfaceView(binding.surfaceView)

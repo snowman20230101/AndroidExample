@@ -42,7 +42,8 @@
 
         <activity android:name=".ui.CameraActivity" />
         <activity android:name=".ui.MediaCodecActivity" />
-
+        <activity android:name=".ui.FirstActivity" />
+        <activity android:name=".ui.SecondActivity" />
     </application>
 
 </manifest>
