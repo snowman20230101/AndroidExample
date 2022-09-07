@@ -1,7 +1,5 @@
 package com.windy.libralive.external
 
-import java.lang.annotation.Native
-
 class NativeCaseTesting {
 
     companion object {
@@ -9,7 +7,6 @@ class NativeCaseTesting {
          * A native method that is implemented by the 'libarlive' native library,
          * which is packaged with this application.
          */
-
         external fun stringFromJNI(): String
 
         /**
@@ -26,6 +23,8 @@ class NativeCaseTesting {
             val i = 5 / 0
         }
 
+
+        external fun initBreakPad(path: String)
 
     }
 }

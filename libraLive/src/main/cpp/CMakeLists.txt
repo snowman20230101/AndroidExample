@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.18.1)
 
 project("libralive")
 
+add_subdirectory(breakpad)
+
 # 定义 rtmp, ffmpeg 总目录的变量
 set(RTMP ${CMAKE_SOURCE_DIR}/rtmp)
 set(ffmpeg ${CMAKE_SOURCE_DIR}/ffmpeg)
@@ -25,6 +27,8 @@ file(GLOB source_file *.cpp
 
 # 引入头文件
 include_directories(
+        ${CMAKE_SOURCE_DIR}/breakpad/src/common/android/include
+        ${CMAKE_SOURCE_DIR}/breakpad/src
         ${ffmpeg}/include
         ${RTMP}/include
         ${CMAKE_SOURCE_DIR}/platform
@@ -64,4 +68,5 @@ target_link_libraries(
         OpenSLES
         EGL
         GLESv3
+        breakpad
         ${log-lib})

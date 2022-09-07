@@ -18,12 +18,12 @@ JavaCallHelper *javaCallHelper;
 
 /**
  * 绘制回调
- * @param data
- * @param lineszie
+ * @param src_data
+ * @param line_size
  * @param w
  * @param ht
  */
-void renderFrameCallBack(uint8_t *data, int lineszie, int w, int ht);
+void renderFrameCallBack(uint8_t *src_data, int line_size, int w, int ht);
 
 static void com_windy_libralive_LibraPlayer_native_prepare(JNIEnv *env, jobject object,
                                                            jstring data_source) {

@@ -1,11 +1,6 @@
 package com.windy.libralive.ui
 
-import android.media.projection.MediaProjectionManager
-import com.windy.libralive.databinding.ActivityMainBinding;
-
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -14,7 +9,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.windy.libralive.R
 import com.windy.libralive.base.view.BaseActivity
+import com.windy.libralive.databinding.ActivityMainBinding
 import com.windy.libralive.external.NativeCaseTesting
+import java.io.File
 
 class MainActivity : BaseActivity() {
     private var _binding: ActivityMainBinding? = null
@@ -23,6 +20,12 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 开启ndk监控
+        val file = File(externalCacheDir, "native_crash")
+        if (!file.exists()) {
+            file.mkdir()
+        }
+        NativeCaseTesting.initBreakPad(file.absolutePath)
 
         viewModel =
             ViewModelProvider(this, defaultViewModelProviderFactory)[MainVewModel::class.java]

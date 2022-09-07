@@ -1,5 +1,6 @@
 #include <string>
 #include "CommonInclude.h"
+#include "Utils.h"
 
 extern "C" {
 #include <librtmp/rtmp.h>
@@ -150,4 +151,14 @@ Java_com_windy_libralive_external_NativeCaseTesting_00024Companion_testStackOver
     (env)->DeleteLocalRef(obj_str);
 
     return str_array;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_windy_libralive_external_NativeCaseTesting_00024Companion_initBreakPad(JNIEnv *env,
+                                                                                jobject thiz,
+                                                                                jstring path) {
+    const char *c_path = env->GetStringUTFChars(path, JNI_FALSE);
+    Utils::initBreakPad(c_path);
+    env->ReleaseStringUTFChars(path, c_path);
 }
