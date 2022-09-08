@@ -8,6 +8,7 @@
 
 #include "BaseChannel.h"
 #include "AudioChannel.h"
+#include "ScaleFilter.h"
 
 /**
  * 1、解码
@@ -34,14 +35,16 @@ public:
     void setAudioChannel(AudioChannel *audioChannel);
 
 private:
-    pthread_t pid_decode;
-    pthread_t pid_render;
+    pthread_t pid_decode {};
+    pthread_t pid_render {};
 
-    int fps;
-    RenderFrameCallback renderFrameCallback;
+    int fps = 0;
+    RenderFrameCallback renderFrameCallback {};
     //
     SwsContext *swsContext = NULL;
     AudioChannel *audioChannel = NULL;
+
+    ScaleFilter *scaleFilter = NULL;
 };
 
 

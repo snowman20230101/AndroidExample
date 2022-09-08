@@ -78,8 +78,8 @@ class ShopFragment : BaseFragment() {
             val file = File(activity?.getExternalFilesDir(""), "Apologize.mp4")
             intent.putExtra(
                 "url",
-                "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"
-//                file.absolutePath
+//                "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"
+                file.absolutePath
 
             )
             startActivity(intent)

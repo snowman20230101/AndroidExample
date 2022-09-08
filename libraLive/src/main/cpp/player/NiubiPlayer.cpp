@@ -118,7 +118,7 @@ void NiubiPlayer::init_prepare() {
         // AVStream 媒体流中就可以拿到时间基 (音视频同步)
         AVRational time_base = avStream->time_base;
 
-        LOGE("视频流时间基 分子=%d, 分母=%d", time_base.num, time_base.den); // 视频流时间基 分子=1, 分母=25000
+        LOGE("NiubiPlayer::init_prepare() 视频流时间基 分子=%d, 分母=%d", time_base.num, time_base.den); // 视频流时间基 分子=1, 分母=25000
         av_dump_format(this->formatContext, 0, this->dataSource, 0);
 
         // TODO 第十步：从编码器参数中获取流类型codec_type
@@ -129,8 +129,10 @@ void NiubiPlayer::init_prepare() {
 
             int fps = (int) av_q2d(avg_frame_rate);
 
-            LOGI("NiubiPlayer::init_prepare() AVStream w=%d, h=%d, fps=%d", avCodecContext->width,
-                 avCodecContext->height, fps);
+            LOGI("NiubiPlayer::init_prepare() AVStream w=%d, h=%d, fps=%d",
+                 avCodecContext->width,
+                 avCodecContext->height, fps
+            );
 
             videoChannel = new VideoChannel(i, avCodecContext, time_base, fps);
             videoChannel->setRenderFrameCallBack(renderFrameCallBack);
@@ -180,11 +182,13 @@ void NiubiPlayer::init_start() {
         if (audioChannel && audioChannel->packets.size() > 100) {
             //10ms
             av_usleep(1000 * 10);
+            LOGD("NiubiPlayer::init_start() audio packets size is %d 多了，睡一会儿", audioChannel->packets.size());
             continue;
         }
         // 内存泄漏点1，解决方案：控制队列大小
         if (videoChannel && videoChannel->packets.size() > 100) {
             av_usleep(1000 * 10);
+            LOGD("NiubiPlayer::init_start() video packets size is %d 多了，睡一会儿", videoChannel->packets.size());
             continue;
         }
 
@@ -208,6 +212,7 @@ void NiubiPlayer::init_start() {
             // 读取完成 但是可能还没播放完
             if (audioChannel->packets.empty() && audioChannel->frames.empty()
                 && videoChannel->packets.empty() && videoChannel->frames.empty()) {
+                LOGE("NiubiPlayer::init_start() packets empty. frame empty.");
                 break;
             }
 
@@ -221,6 +226,8 @@ void NiubiPlayer::init_start() {
             break;
         }
     } // while end
+
+    LOGE("NiubiPlayer::init_start() finished.");
 
     // 最后做释放的工作
     isPlaying = 0;

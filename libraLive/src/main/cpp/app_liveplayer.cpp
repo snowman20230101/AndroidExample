@@ -23,7 +23,7 @@ JavaCallHelper *javaCallHelper;
  * @param w
  * @param ht
  */
-void renderFrameCallBack(uint8_t *src_data, int line_size, int w, int ht);
+void renderFrameCallBack(uint8_t *src_data, int src_lineSize, int w, int ht);
 
 static void com_windy_libralive_LibraPlayer_native_prepare(JNIEnv *env, jobject object,
                                                            jstring data_source) {
@@ -70,6 +70,12 @@ static void com_windy_libralive_LibraPlayer_native_setSurface(JNIEnv *env, jobje
     }
 
     window = ANativeWindow_fromSurface(env, surface);
+
+    int32_t width = ANativeWindow_getWidth(window);
+    int32_t height = ANativeWindow_getHeight(window);
+
+    LOGD("native_setSurface() width=%d, height=%d", width, height);
+
     pthread_mutex_unlock(&mutex);
 }
 
@@ -109,7 +115,7 @@ int register_com_windy_libralive_LibraPlayer(JNIEnv *env) {
     return registerNativesMethods(env, className, methods, (sizeof(methods) / sizeof(methods[0])));
 }
 
-void renderFrameCallBack(uint8_t *src_data, int width, int height, int src_liinesize) {
+void renderFrameCallBack(uint8_t *src_data, int src_lineSize, int width, int height) {
     pthread_mutex_lock(&mutex);
 
     if (!window) {
@@ -139,12 +145,12 @@ void renderFrameCallBack(uint8_t *src_data, int width, int height, int src_liine
 
     // 填数据到buffer，其实就是修改数据
     uint8_t *dst_data = static_cast<uint8_t *>(windowBuffer.bits);
-    int lineSize = windowBuffer.stride * 4; // RGBA 相当于是 每一个像素点 * rgba
+    int dstLineSize = windowBuffer.stride * 4; // RGBA 相当于是 每一个像素点 * rgba
 
     // 下面就是逐行Copy了
     for (int i = 0; i < windowBuffer.height; ++i) {
         // 一行 一行 的 Copy 到 Android屏幕上
-        memcpy(dst_data + i * lineSize, src_data + i * src_liinesize, lineSize);
+        memcpy(dst_data + i * dstLineSize, src_data + i * src_lineSize, dstLineSize);
     }
 
     ANativeWindow_unlockAndPost(window);

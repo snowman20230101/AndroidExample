@@ -31,11 +31,18 @@ void NativeRender::Init(int videoWidth, int videoHeight, int *dstSize) {
         m_DstWidth = windowHeight * videoWidth / videoHeight;
         m_DstHeight = windowHeight;
     }
-    LOGD("NativeRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]", windowWidth,
-         windowHeight, m_DstWidth, m_DstHeight);
+    LOGD("NativeRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]",
+         windowWidth,
+         windowHeight,
+         m_DstWidth,
+         m_DstHeight
+    );
 
-    ANativeWindow_setBuffersGeometry(m_NativeWindow, m_DstWidth,
-                                     m_DstHeight, WINDOW_FORMAT_RGBA_8888);
+    ANativeWindow_setBuffersGeometry(m_NativeWindow,
+                                     m_DstWidth,
+                                     m_DstHeight,
+                                     WINDOW_FORMAT_RGBA_8888
+    );
 
     dstSize[0] = m_DstWidth;
     dstSize[1] = m_DstHeight;

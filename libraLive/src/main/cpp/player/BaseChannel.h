@@ -26,17 +26,17 @@ public:
 
 public:
     int id;
-    AVCodecContext *mAvCodecContext;
-    AVRational time_base;
+    AVCodecContext *mAvCodecContext = NULL;
+    AVRational time_base{};
 
     // 编码数据包队列
     message_queue<AVPacket *> packets;
     // 解码数据包队列
     message_queue<AVFrame *> frames;
 
-    bool isPlaying;
-    double audioTime; // 每一帧，音频计算后的时间值
-    double videoTime; // 每一帧，视频计算后的时间值
+    int isPlaying = 0;
+    double audioTime = 0; // 每一帧，音频计算后的时间值
+    double videoTime = 0; // 每一帧，视频计算后的时间值
 };
 
 

@@ -152,6 +152,7 @@ void AudioChannel::decode() {
         if (isPlaying && frames.size() > 100) {
             // 休眠 等待队列中的数据被消费
             av_usleep(10 * 1000);
+            LOGE("AudioChannel::decode() frames 数据有点多，睡一会儿");
             continue;
         }
 
@@ -165,6 +166,7 @@ void AudioChannel::decode() {
 
         // 取出失败
         if (!ret) {
+            LOGE("AudioChannel::decode() packets 取出失败");
             continue;
         }
 
@@ -187,18 +189,18 @@ void AudioChannel::decode() {
         // 需要更多的数据才能够进行解码 eagain
         if (ret == AVERROR(EAGAIN)) {
             // 在此状态下，输出不可用——用户必须尝试发送新的输入
-            LOGE("output is not available in this state - "
+            LOGE("AudioChannel::decode() output is not available in this state - "
                  "user must try to send new input ret=%s", av_err2str(ret));
             continue;
         } else if (ret == AVERROR_EOF) {
-            LOGE("the decoder has been fully flushed, and there will be"
+            LOGE("AudioChannel::decode() the decoder has been fully flushed, and there will be"
                  "no more output frames. ret=%s", av_err2str(ret));
             continue;
         } else if (ret == AVERROR(EINVAL)) {
-            LOGE("codec not opened, or it is an encoder. ret=%s", av_err2str(ret));
+            LOGE("AudioChannel::decode() codec not opened, or it is an encoder. ret=%s", av_err2str(ret));
             continue;
         } else if (ret == AVERROR_INPUT_CHANGED) {
-            LOGE("current decoded frame has changed parameters"
+            LOGE("AudioChannel::decode() current decoded frame has changed parameters"
                  " with respect to first decoded frame. Applicable"
                  " when flag AV_CODEC_FLAG_DROPCHANGED is set. ret=%s", av_err2str(ret));
             continue;

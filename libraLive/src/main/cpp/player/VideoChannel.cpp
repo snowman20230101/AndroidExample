@@ -5,6 +5,20 @@
 //#include <queue>
 #include "VideoChannel.h"
 
+extern "C" {
+#include <libavfilter/buffersrc.h>
+#include <libavfilter/buffersink.h>
+}
+
+//const char *filter_descr = "drawtext=fontfile=arial.ttf:fontcolor=red:fontsize=50:text='Shuo.Wang'";
+//const char *filter_descr = "lutyuv='u=128:v=128'";
+//const char *filter_descr = "boxblur";
+//const char *filter_descr = "hflip";
+//const char *filter_descr = "hue='h=60:s=-3'";
+//const char *filter_descr = "crop=2/3*in_w:2/3*in_h";
+//const char *filter_descr = "drawbox=x=100:y=100:w=100:h=100:color=pink@0.5";
+const char *filter_descr = "scale=78:24,transpose=cclock";
+
 /**
  * 解码，线程回调
  * @param obj
@@ -40,13 +54,16 @@ VideoChannel::VideoChannel(int id, AVCodecContext *avCodecContext, AVRational ti
     this->mAvCodecContext = avCodecContext;
     this->time_base = time_base;
 
+    scaleFilter = new ScaleFilter(avCodecContext, time_base);
+    scaleFilter->initFilter(filter_descr);
+
     this->fps = fps;
     frames.setSyncHandle(dropAvFrame);
     packets.setSyncHandle(dropAvPacket);
 }
 
 VideoChannel::~VideoChannel() {
-
+    LOGD("");
 }
 
 void VideoChannel::start() {
@@ -84,6 +101,7 @@ void VideoChannel::decode() {
         if (isPlaying && frames.size() > 100) {
             // 休眠 等待队列中的数据被消费
             av_usleep(10 * 1000); // 微妙
+            LOGE("VideoChannel::decode() frames 数据有点多，睡一会儿");
             continue;
         }
 
@@ -97,6 +115,7 @@ void VideoChannel::decode() {
 
         // 取出失败
         if (!ret) {
+            LOGE("VideoChannel::decode() packets 取出失败");
             continue;
         }
 
@@ -114,7 +133,8 @@ void VideoChannel::decode() {
         releaseAvPacket(&packet);
 
         // 代表了一个图像 (将这个图像先输出来)
-        AVFrame *frame = av_frame_alloc(); // AVFrame 拿到解码后的原始数据包 （原始数据包，内部还是空的）
+        AVFrame *filter_frame = av_frame_alloc(); // AVFrame 拿到解码后的原始数据包 （原始数据包，内部还是空的）
+        AVFrame *frame = av_frame_alloc();
 
         // 从解码器中读取 解码后的数据包 AVFrame // 第三步： AVFrame 就有了值了 原始数据==YUV，最终打好的饭菜（原始数据）
         ret = avcodec_receive_frame(mAvCodecContext, frame);
@@ -125,17 +145,46 @@ void VideoChannel::decode() {
         if (ret == AVERROR(EAGAIN)) {
             // 重来，重新取，没有取到关键帧，重试一遍
             releaseAvFrame(&frame); // 内存释放点
+            releaseAvFrame(&filter_frame); // 内存释放点
+            LOGE("VideoChannel::decode() 重来，重新取，没有取到关键帧，重试一遍");
             continue;
         } else if (ret != 0) {
             // 释放规则：必须是后面不再使用了，才符合释放的要求
             releaseAvFrame(&frame); // 内存释放点
+            releaseAvFrame(&filter_frame); // 内存释放点
             break;
+        }
+
+        LOGD("VideoChannel::decode() width=%d, height=%d linesize=%d", frame->width,
+             frame->height, frame->linesize[0]);
+
+        // 滤镜输入
+        ret = av_buffersrc_add_frame_flags(scaleFilter->bufferSrc_ctx, frame,
+                                           AV_BUFFERSRC_FLAG_KEEP_REF);
+        if (ret < 0) {
+            LOGE("VideoChannel::decode() Error while feeding the filtergraph.");
+        } else {
+            LOGD("VideoChannel::decode() 输入滤镜成果");
+        }
+
+        // 滤镜输出
+        ret = av_buffersink_get_frame(scaleFilter->bufferSink_ctx, filter_frame);
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+            LOGE("VideoChannel::decode() 滤镜输出出问题了");
+            continue;
+        }
+        if (ret < 0) {
+            LOGE("VideoChannel::decode() Error while 滤镜输出");
+        } else {
+            LOGD("VideoChannel::decode() 取出滤镜成果");
         }
 
         // TODO AVPacket H264压缩数据 ----》 AVFrame YUV 原始数据
         // 终于取到了，解码后的视频数据（原始数据）
         // 再开一个线程 来播放 (流畅度)
-        frames.push(frame); // 加入队列，为什么没有使用，无法满足"释放规则"
+        frames.push(filter_frame); // 加入队列，为什么没有使用，无法满足"释放规则"
+
+        releaseAvFrame(&frame); // 内存释放点
     }
 
     // 必须考虑的
@@ -192,6 +241,7 @@ void VideoChannel::render() {
         }
 
         if (!ret) {
+            LOGE(" VideoChannel::render() 获取视频帧失败 frames size is %d", frames.size());
             continue;
         }
 
@@ -266,6 +316,7 @@ void VideoChannel::render() {
 
         } else {
             // 百分百完美 音频 视频 同步了
+            LOGD("VideoChannel::render() 百分百完美 音频 视频 同步了");
         }
 
         // 渲染，显示在屏幕上了
@@ -273,9 +324,9 @@ void VideoChannel::render() {
         // 渲染一帧图像（宽，高，数据）
         this->renderFrameCallback(
                 dst_data[0],
+                dstStride[0],
                 mAvCodecContext->width,
-                mAvCodecContext->height,
-                dstStride[0]
+                mAvCodecContext->height
         );
 
         releaseAvFrame(&frame); // 渲染完了，frame没用了，释放掉
@@ -330,6 +381,7 @@ void *task_render(void *obj) {
  */
 void dropAvFrame(std::queue<AVFrame *> &q) {
     if (!q.empty()) {
+        LOGD("VideoChannel:: dropAvFrame() AVFrame queue size %d", q.size());
         AVFrame *frame = q.front();
         BaseChannel::releaseAvFrame(&frame);
         q.pop();
@@ -339,6 +391,8 @@ void dropAvFrame(std::queue<AVFrame *> &q) {
 void dropAvPacket(std::queue<AVPacket *> &qq) {
     if (!qq.empty()) {
         AVPacket *packet = qq.front();
+        LOGD("VideoChannel:: dropAvFrame() AVPacket queue size %d flags is %d", qq.size(),
+             packet->flags);
         // BaseChannel::releaseAVPacket(&packet); // 关键帧没有了
         if (packet->flags != AV_PKT_FLAG_KEY) { // AV_PKT_FLAG_KEY == 关键帧
             BaseChannel::releaseAvPacket(&packet);

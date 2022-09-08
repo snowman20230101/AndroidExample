@@ -11,12 +11,13 @@ set(ffmpeg ${CMAKE_SOURCE_DIR}/ffmpeg)
 # 引入c/c++编译源文件
 file(GLOB source_file *.cpp
         ffmpeg/examples/decode_video.c
-#        ffmpeg/examples/filtering_video.c
-#        ffmpeg/examples/filtering_audio.c
-#        ffmpeg/examples/filter_audio.c
+        ffmpeg/examples/filtering_video.c
+        ffmpeg/examples/filtering_audio.c
+        ffmpeg/examples/filter_audio.c
         player/*.cpp
         player/VideoChannel.cpp
         player/render/*.cpp
+        player/filter/ScaleFilter.cpp
         platform/*.cpp
         common/*.cpp
         util/*.cpp
@@ -35,6 +36,7 @@ include_directories(
         ${CMAKE_SOURCE_DIR}/common
         ${CMAKE_SOURCE_DIR}/util
         ${CMAKE_SOURCE_DIR}/player
+        ${CMAKE_SOURCE_DIR}/player/filter
         ${CMAKE_SOURCE_DIR}/player/render
         ${CMAKE_SOURCE_DIR}/glm
         ${CMAKE_SOURCE_DIR}/egl
@@ -60,7 +62,9 @@ find_library(
 # 连接动态库
 target_link_libraries(
         libralive
-        avformat avcodec avfilter avutil swresample swscale
+        -Wl,--start-group
+        avformat avcodec avutil avfilter swresample swscale
+        -Wl,--end-group
         z
         rtmp
         android

@@ -37,7 +37,7 @@
 extern "C" {
 #include "libavcodec/avcodec.h" // 视频解码器
 #include "libavformat/avformat.h" // 封装格式
-//#include "libavfilter/avfilter.h" // 滤镜
+#include "libavfilter/avfilter.h" // 滤镜
 #include "libswscale/swscale.h" // 视频缩放
 #include "libavutil/imgutils.h" // 图像处理
 #include <libavutil/ffversion.h> // verison
