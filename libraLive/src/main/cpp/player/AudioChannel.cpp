@@ -108,7 +108,7 @@ AudioChannel::AudioChannel(int id, AVCodecContext *avCodecContext, AVRational ti
                                     AV_CH_LAYOUT_STEREO,
                                     AV_SAMPLE_FMT_S16,
                                     out_sample_rate,
-                                    mAvCodecContext->channel_layout,
+                                    (int64_t) mAvCodecContext->channel_layout,
                                     mAvCodecContext->sample_fmt,
                                     mAvCodecContext->sample_rate,
                                     0,
@@ -176,11 +176,7 @@ void AudioChannel::decode() {
     AVPacket *packet = 0;
 
     while (isPlaying) {
-        // 生产快  消费慢
-        // 消费速度比生成速度慢（生成100，只消费10个，这样队列会爆）
-        // 内存泄漏点1，解决方案：控制队列大小
         if (isPlaying && frames.size() > 100) {
-            // 休眠 等待队列中的数据被消费
             av_usleep(10 * 1000);
 //            LOGE("AudioChannel::decode() frames 数据有点多，睡一会儿");
             continue;
@@ -246,14 +242,17 @@ void AudioChannel::decode() {
             break;
         }
 
-        // 再开一个线程 来播放 (流畅度)
+//        doFilter(frame);
+//        releaseAvFrame(&frame);
+
+        // 无滤镜方式。
         frames.push(frame);
     }
 
     releaseAvPacket(&packet);
 }
 
-void AudioChannel::doFilter(AVFrame *&frame, AVFrame *&filter_frame) {
+void AudioChannel::doFilter(AVFrame *frame) {
     if (!audioFilter) {
         return;
     }
@@ -265,6 +264,8 @@ void AudioChannel::doFilter(AVFrame *&frame, AVFrame *&filter_frame) {
         LOGE("AudioChannel::decode() error add frame to buffersrc. ret=%s", av_err2str(ret));
     }
 
+    AVFrame *filter_frame = av_frame_alloc();
+
     ret = av_buffersink_get_frame(audioFilter->bufferSink_ctx, filter_frame);
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
         LOGE("AudioChannel::decode() error get frame. ret=%s", av_err2str(ret));
@@ -273,6 +274,8 @@ void AudioChannel::doFilter(AVFrame *&frame, AVFrame *&filter_frame) {
     if (ret < 0) {
         LOGE("AudioChannel::decode() error get frame buffersink. ret=%s", av_err2str(ret));
     }
+
+    frames.push(filter_frame);
 }
 
 int AudioChannel::getPcm() {
@@ -345,7 +348,7 @@ int AudioChannel::getPcm() {
     // 返回 每一个声道的输出数据个数
     int samples = swr_convert(swrContext,
                               &out_buffers,
-                              max_samples,
+                              (int) max_samples,
                               (const uint8_t **) frame->data,
                               frame->nb_samples
     );
@@ -355,7 +358,7 @@ int AudioChannel::getPcm() {
     pcm_data_size = samples * out_sample_size * out_channels;
 
     // 获得 相对播放这一段数据的秒数
-    this->audioTime = frame->best_effort_timestamp * av_q2d(time_base);
+    this->audioTime = (double) frame->best_effort_timestamp * av_q2d(time_base);
 
     releaseAvFrame(&frame);
 

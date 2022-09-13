@@ -184,18 +184,17 @@ void NiubiPlayer::init_start() {
     int ret;
     while (isPlaying) {
         // TODO 由于我们的操作是在异步线程，那就好办了，等待（先让消费者消费掉，然后在生产）
-        // 下面解决方案：通俗易懂 让生产慢一点，消费了，在生产
-        // 内存泄漏点1，解决方案：控制队列大小
         if (audioChannel && audioChannel->packets.size() > 100) {
-            //10ms
+            // 10ms
             av_usleep(1000 * 10);
-//            LOGD("NiubiPlayer::init_start() audio packets size is %d 多了，睡一会儿", audioChannel->packets.size());
+            LOGD("NiubiPlayer::init_start() audio packets size is %d 多了，睡一会儿",
+                 audioChannel->packets.size());
             continue;
         }
-        // 内存泄漏点1，解决方案：控制队列大小
         if (videoChannel && videoChannel->packets.size() > 100) {
             av_usleep(1000 * 10);
-//            LOGD("NiubiPlayer::init_start() video packets size is %d 多了，睡一会儿", videoChannel->packets.size());
+            LOGD("NiubiPlayer::init_start() video packets size is %d 多了，睡一会儿",
+                 videoChannel->packets.size());
             continue;
         }
 
@@ -220,7 +219,8 @@ void NiubiPlayer::init_start() {
             BaseChannel::releaseAvPacket(&packet);
             if (audioChannel->packets.empty() && audioChannel->frames.empty()
                 && videoChannel->packets.empty() && videoChannel->frames.empty()) {
-                LOGE("NiubiPlayer::init_start() packets empty. frame empty.");
+                LOGE("NiubiPlayer::init_start() packets empty. frame empty. ret=%s",
+                     av_err2str(ret));
                 break;
             }
 

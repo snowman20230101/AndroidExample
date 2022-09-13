@@ -24,7 +24,7 @@ public:
 
     void decode();
 
-    void doFilter(AVFrame *&frame, AVFrame *&filter_frame);
+    void doFilter(AVFrame *frame);
 
     void init_start();
 

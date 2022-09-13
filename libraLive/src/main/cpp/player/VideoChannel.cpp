@@ -80,7 +80,7 @@ void VideoChannel::start() {
 }
 
 void VideoChannel::stop() {
-    LOGD("VideoChannel::stop");
+    LOGD("VideoChannel::stop()");
     isPlaying = 0;
 
     frames.backWork();
@@ -139,7 +139,7 @@ void VideoChannel::decode() {
         if (ret == AVERROR(EAGAIN)) {
             // 重来，重新取，没有取到关键帧，重试一遍
             releaseAvFrame(&frame); // 内存释放点
-            LOGE("VideoChannel::decode() 重来，重新取，没有取到关键帧，重试一遍");
+            LOGE("VideoChannel::decode() 重来，重新取，没有取到关键帧，重试一遍, ret=%s", av_err2str(ret));
             continue;
         } else if (ret != 0) {
             // 释放规则：必须是后面不再使用了，才符合释放的要求
@@ -277,9 +277,6 @@ void VideoChannel::render() {
 
         // 等一等 音频
         // av_usleep(result_delay * 1000000);
-
-        // 知识控制来 视频慢下来来而已，还没有同步
-
         // 拿到视频 frame timestamp estimated using various heuristics, in stream time base
         this->videoTime = frame->best_effort_timestamp * av_q2d(this->time_base);
 //        LOGE("videoTime=%lld", frame->best_effort_timestamp);
