@@ -12,17 +12,19 @@
 //const char *filter_descr = "drawbox=x=100:y=100:w=100:h=100:color=pink@0.5";
 
 ScaleFilter::ScaleFilter(AVCodecContext *codecContext, AVRational timeBase)
-        : avCodecContext(codecContext), time_base(timeBase) {
+        : Filter(codecContext, timeBase, FilterType::VIDEO) {
     LOGD("ScaleFilter::ScaleFilter()");
 }
 
 ScaleFilter::~ScaleFilter() {
     LOGD("ScaleFilter::~ScaleFilter()");
-    avfilter_graph_free(&filterGraph);
+    if (filterGraph) {
+        avfilter_graph_free(&filterGraph);
+    }
 }
 
 int ScaleFilter::initFilter(const char *filters_descr) {
-    int ret;
+    int ret = 0;
 
     const AVFilter *bufferSrc = avfilter_get_by_name("buffer");
     const AVFilter *bufferSink = avfilter_get_by_name("buffersink");
@@ -55,14 +57,14 @@ int ScaleFilter::initFilter(const char *filters_descr) {
     // 创建并向FilterGraph中添加一个Filter。
     ret = avfilter_graph_create_filter(&bufferSrc_ctx, bufferSrc, "in", args, NULL, filterGraph);
     if (ret < 0) {
-        LOGE("ScaleFilter::initFilter() Cannot create buffer source.");
+        LOGE("ScaleFilter::initFilter() Cannot create video buffer source.");
         goto end;
     }
 
     /* buffer video sink: to terminate the filter chain. */
     ret = avfilter_graph_create_filter(&bufferSink_ctx, bufferSink, "out", NULL, NULL, filterGraph);
     if (ret < 0) {
-        LOGE("ScaleFilter::initFilter() Cannot create buffer sink.");
+        LOGE("ScaleFilter::initFilter() Cannot create video buffer sink.");
         goto end;
     }
 

@@ -28,6 +28,8 @@ public:
 
     void decode();
 
+    void doFilter(AVFrame *frame);
+
     void render();
 
     void setRenderFrameCallBack(RenderFrameCallback renderFrameCallback);
@@ -35,11 +37,11 @@ public:
     void setAudioChannel(AudioChannel *audioChannel);
 
 private:
-    pthread_t pid_decode {};
-    pthread_t pid_render {};
+    pthread_t pid_decode{};
+    pthread_t pid_render{};
 
     int fps = 0;
-    RenderFrameCallback renderFrameCallback {};
+    RenderFrameCallback renderFrameCallback{};
     //
     SwsContext *swsContext = NULL;
     AudioChannel *audioChannel = NULL;

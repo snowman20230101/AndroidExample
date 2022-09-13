@@ -8,19 +8,23 @@
 #include "BaseChannel.h"
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
+
 #include "CommonInclude.h"
+#include "AudioFilter.h"
 
 class AudioChannel : public BaseChannel {
 public:
     AudioChannel(int id, AVCodecContext *avCodecContext, AVRational time_base);
 
-    ~AudioChannel();
+    ~AudioChannel() override;
 
     void start() override;
 
     void stop() override;
 
     void decode();
+
+    void doFilter(AVFrame *&frame, AVFrame *&filter_frame);
 
     void init_start();
 
@@ -30,10 +34,10 @@ public:
     //  定义一个缓冲区
     uint8_t *out_buffers = 0;
 
-    int out_channels;
-    int out_sample_size;
-    int out_sample_rate;
-    int64_t max_dst_nb_samples;
+    int out_channels = 0;
+    int out_sample_size = 0;
+    int out_sample_rate = 0;
+    int64_t max_dst_nb_samples = 0;
 
     // 输出定义
 //    u_int8_t **dst_data = 0;
@@ -44,8 +48,8 @@ public:
 
 private:
     // 线程ID
-    pthread_t pid_audio_decode;
-    pthread_t pid_audio_play;
+    pthread_t pid_audio_decode{};
+    pthread_t pid_audio_play{};
 
     /**
      * OpenSL ES
@@ -66,6 +70,8 @@ private:
 
     // 音频转换 ==（重采样）
     SwrContext *swrContext = NULL;
+
+    AudioFilter *audioFilter = NULL;
 };
 
 

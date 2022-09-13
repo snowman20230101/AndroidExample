@@ -10,21 +10,22 @@ set(ffmpeg ${CMAKE_SOURCE_DIR}/ffmpeg)
 
 # 引入c/c++编译源文件
 file(GLOB source_file *.cpp
-        ffmpeg/examples/decode_video.c
-        ffmpeg/examples/filtering_video.c
-        ffmpeg/examples/filtering_audio.c
-        ffmpeg/examples/filter_audio.c
+#        ffmpeg/examples/decode_video.c
+#        ffmpeg/examples/filtering_video.c
+#        ffmpeg/examples/filtering_audio.c
+#        ffmpeg/examples/filter_audio.c
         player/*.cpp
         player/VideoChannel.cpp
         player/render/*.cpp
         player/filter/ScaleFilter.cpp
+        player/filter/AudioFilter.cpp
         platform/*.cpp
         common/*.cpp
         util/*.cpp
         egl/*.cpp
         looper/*.cpp
 #        egl/OffscreenSurface.cpp
-)
+        )
 
 # 引入头文件
 include_directories(

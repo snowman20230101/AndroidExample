@@ -5,23 +5,15 @@
 #ifndef ANDROIDEXAMPLE_SCALEFILTER_H
 #define ANDROIDEXAMPLE_SCALEFILTER_H
 
-#include "CommonInclude.h"
+#include "Filter.h"
 
-class ScaleFilter {
+class ScaleFilter : public Filter {
 public:
     ScaleFilter(AVCodecContext *codecContext, AVRational timeBase);
 
-    ~ScaleFilter();
+    ~ScaleFilter() override;
 
-    int initFilter(const char *filters_descr);
-
-public:
-    AVFilterContext *bufferSrc_ctx = NULL;
-    AVFilterContext *bufferSink_ctx = NULL;
-    AVCodecContext *avCodecContext = NULL;
-    AVFilterGraph *filterGraph = NULL;
-
-    AVRational time_base{};
+    int initFilter(const char *filters_descr) override;
 };
 
 

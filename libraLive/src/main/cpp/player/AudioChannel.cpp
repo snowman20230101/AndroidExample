@@ -4,6 +4,13 @@
 
 #include "AudioChannel.h"
 
+extern "C" {
+#include <libavfilter/buffersrc.h>
+#include <libavfilter/buffersink.h>
+}
+
+static const char *filter_descr = "aresample=8000,aformat=sample_fmts=s16:channel_layouts=mono";
+
 // 声明并且实现
 void *audio_decode(void *args);
 
@@ -34,7 +41,8 @@ static int get_format_from_sample_fmt(const char **fmt,
 
     fprintf(stderr,
             "Sample format %s not supported as output format\n",
-            av_get_sample_fmt_name(sample_fmt));
+            av_get_sample_fmt_name(sample_fmt)
+    );
     return AVERROR(EINVAL);
 }
 
@@ -62,17 +70,38 @@ AudioChannel::AudioChannel(int id, AVCodecContext *avCodecContext, AVRational ti
     this->mAvCodecContext = avCodecContext;
     this->time_base = time_base;
 
+    audioFilter = new AudioFilter(this->mAvCodecContext, this->time_base);
+    audioFilter->initFilter(filter_descr);
+
     out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO); // 输出声道
     out_sample_size = av_get_bytes_per_sample(AV_SAMPLE_FMT_S16); // 输出缓冲区位数
-    out_sample_rate = 44100; // 采样
+    out_sample_rate = 44100; // 采样率
 
-//
-//    // 2*44.1kHz*16bit=1.411Mbit/s
+    // 2*44.1kHz*16bit=1.411Mbit/s 比特率(码率) 44100* 16 * 2 = 1411200 bps。
+    // 关于音频文件大小的计算文件大小 = 采样率 * 录音时间 * 采样位数 / 8 * 通道数
     int out_buffers_size = out_sample_rate * out_sample_size * out_channels;
+    LOGD("AudioChannel::AudioChannel() out_channels=%d, out_sample_size=%d, out_sample_rate=%d, out_buffers_size=%d",
+         out_channels,
+         out_sample_size,
+         out_sample_rate,
+         out_buffers_size
+    );
 //
 //    // 缓冲区是拿到三者  通道数 * 采用率 * s16
     out_buffers = static_cast<uint8_t *>(malloc(out_buffers_size)); // unsigned char*
     memset(out_buffers, 0, out_buffers_size);
+
+    LOGD("AudioChannel::AudioChannel() inputStream of channel_layout=%llu, sample_fmt=%s, sample_rate=%d",
+         mAvCodecContext->channel_layout,
+         av_get_sample_fmt_name(avCodecContext->sample_fmt),
+         avCodecContext->sample_rate
+    );
+
+    LOGD("AudioChannel::AudioChannel() outputStream of channel_layout=%d, sample_fmt=%s, sample_rate=%d",
+         out_channels,
+         av_get_sample_fmt_name(AV_SAMPLE_FMT_S16),
+         out_sample_rate
+    );
 
     // 申请上下文
     swrContext = swr_alloc_set_opts(swrContext,
@@ -89,7 +118,8 @@ AudioChannel::AudioChannel(int id, AVCodecContext *avCodecContext, AVRational ti
     // 初始化一下 转换上下文
     int ret = swr_init(swrContext);
     if (ret < 0) {
-        LOGE("Failed to initialize the swr_init context ret=%s", av_err2str(ret));
+        LOGE("AudioChannel::AudioChannel() Failed to initialize the swr_init context ret=%s",
+             av_err2str(ret));
     }
 
     // converted input samples 转换输入样本
@@ -152,7 +182,7 @@ void AudioChannel::decode() {
         if (isPlaying && frames.size() > 100) {
             // 休眠 等待队列中的数据被消费
             av_usleep(10 * 1000);
-            LOGE("AudioChannel::decode() frames 数据有点多，睡一会儿");
+//            LOGE("AudioChannel::decode() frames 数据有点多，睡一会儿");
             continue;
         }
 
@@ -191,21 +221,28 @@ void AudioChannel::decode() {
             // 在此状态下，输出不可用——用户必须尝试发送新的输入
             LOGE("AudioChannel::decode() output is not available in this state - "
                  "user must try to send new input ret=%s", av_err2str(ret));
+            releaseAvFrame(&frame);
             continue;
         } else if (ret == AVERROR_EOF) {
             LOGE("AudioChannel::decode() the decoder has been fully flushed, and there will be"
                  "no more output frames. ret=%s", av_err2str(ret));
+            releaseAvFrame(&frame);
             continue;
         } else if (ret == AVERROR(EINVAL)) {
-            LOGE("AudioChannel::decode() codec not opened, or it is an encoder. ret=%s", av_err2str(ret));
+            LOGE("AudioChannel::decode() codec not opened, or it is an encoder. ret=%s",
+                 av_err2str(ret)
+            );
+            releaseAvFrame(&frame);
             continue;
         } else if (ret == AVERROR_INPUT_CHANGED) {
             LOGE("AudioChannel::decode() current decoded frame has changed parameters"
                  " with respect to first decoded frame. Applicable"
                  " when flag AV_CODEC_FLAG_DROPCHANGED is set. ret=%s", av_err2str(ret));
+            releaseAvFrame(&frame);
             continue;
         } else if (ret != 0) {
             LOGE("AudioChannel::decode() error. ret=%s", av_err2str(ret));
+            releaseAvFrame(&frame);
             break;
         }
 
@@ -214,6 +251,28 @@ void AudioChannel::decode() {
     }
 
     releaseAvPacket(&packet);
+}
+
+void AudioChannel::doFilter(AVFrame *&frame, AVFrame *&filter_frame) {
+    if (!audioFilter) {
+        return;
+    }
+
+    int ret = av_buffersrc_add_frame_flags(audioFilter->bufferSrc_ctx, frame,
+                                           AV_BUFFERSRC_FLAG_KEEP_REF
+    );
+    if (ret < 0) {
+        LOGE("AudioChannel::decode() error add frame to buffersrc. ret=%s", av_err2str(ret));
+    }
+
+    ret = av_buffersink_get_frame(audioFilter->bufferSink_ctx, filter_frame);
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+        LOGE("AudioChannel::decode() error get frame. ret=%s", av_err2str(ret));
+    }
+
+    if (ret < 0) {
+        LOGE("AudioChannel::decode() error get frame buffersink. ret=%s", av_err2str(ret));
+    }
 }
 
 int AudioChannel::getPcm() {

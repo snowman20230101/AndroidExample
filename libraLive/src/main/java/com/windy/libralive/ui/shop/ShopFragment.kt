@@ -75,7 +75,7 @@ class ShopFragment : BaseFragment() {
         // 播放器
         binding.ffmpegPlayTest.setOnClickListener {
             val intent = Intent(activity, PlayerActivity::class.java)
-            val file = File(activity?.getExternalFilesDir(""), "Apologize.mp4")
+            val file = File(activity?.getExternalFilesDir(""), "haoshengyin_4.mp4")
             intent.putExtra(
                 "url",
 //                "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"

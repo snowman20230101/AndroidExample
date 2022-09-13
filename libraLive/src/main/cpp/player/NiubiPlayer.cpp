@@ -117,21 +117,28 @@ void NiubiPlayer::init_prepare() {
 
         // AVStream 媒体流中就可以拿到时间基 (音视频同步)
         AVRational time_base = avStream->time_base;
+        const char *codecName = avcodec_get_name(codecParameters->codec_id);
 
-        LOGE("NiubiPlayer::init_prepare() 视频流时间基 分子=%d, 分母=%d", time_base.num, time_base.den); // 视频流时间基 分子=1, 分母=25000
-        av_dump_format(this->formatContext, 0, this->dataSource, 0);
+        // // 视频流时间基 分子=1, 分母=25000
+        LOGI("NiubiPlayer::init_prepare() codecName=%s, 分子=%d, 分母=%d",
+             codecName,
+             time_base.num,
+             time_base.den
+        );
+
+//        av_dump_format(this->formatContext, 0, this->dataSource, 0);
 
         // TODO 第十步：从编码器参数中获取流类型codec_type
         if (codecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {
             // 获取视频相关的 fps
             // 平均帧率 == 时间基
             AVRational avg_frame_rate = avStream->avg_frame_rate;
-
             int fps = (int) av_q2d(avg_frame_rate);
 
             LOGI("NiubiPlayer::init_prepare() AVStream w=%d, h=%d, fps=%d",
                  avCodecContext->width,
-                 avCodecContext->height, fps
+                 avCodecContext->height,
+                 fps
             );
 
             videoChannel = new VideoChannel(i, avCodecContext, time_base, fps);
@@ -182,13 +189,13 @@ void NiubiPlayer::init_start() {
         if (audioChannel && audioChannel->packets.size() > 100) {
             //10ms
             av_usleep(1000 * 10);
-            LOGD("NiubiPlayer::init_start() audio packets size is %d 多了，睡一会儿", audioChannel->packets.size());
+//            LOGD("NiubiPlayer::init_start() audio packets size is %d 多了，睡一会儿", audioChannel->packets.size());
             continue;
         }
         // 内存泄漏点1，解决方案：控制队列大小
         if (videoChannel && videoChannel->packets.size() > 100) {
             av_usleep(1000 * 10);
-            LOGD("NiubiPlayer::init_start() video packets size is %d 多了，睡一会儿", videoChannel->packets.size());
+//            LOGD("NiubiPlayer::init_start() video packets size is %d 多了，睡一会儿", videoChannel->packets.size());
             continue;
         }
 
@@ -210,6 +217,7 @@ void NiubiPlayer::init_start() {
             }
         } else if (ret == AVERROR_EOF) {
             // 读取完成 但是可能还没播放完
+            BaseChannel::releaseAvPacket(&packet);
             if (audioChannel->packets.empty() && audioChannel->frames.empty()
                 && videoChannel->packets.empty() && videoChannel->frames.empty()) {
                 LOGE("NiubiPlayer::init_start() packets empty. frame empty.");
@@ -223,6 +231,7 @@ void NiubiPlayer::init_start() {
         } else {
             // 代表失败了，有问题
             LOGD("代表失败了，有问题");
+            BaseChannel::releaseAvPacket(&packet);
             break;
         }
     } // while end

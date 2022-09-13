@@ -11,13 +11,13 @@ extern "C" {
 }
 
 //const char *filter_descr = "drawtext=fontfile=arial.ttf:fontcolor=red:fontsize=50:text='Shuo.Wang'";
-//const char *filter_descr = "lutyuv='u=128:v=128'";
-//const char *filter_descr = "boxblur";
-//const char *filter_descr = "hflip";
-//const char *filter_descr = "hue='h=60:s=-3'";
-//const char *filter_descr = "crop=2/3*in_w:2/3*in_h";
+//const char *filter_descr = "lutyuv='u=128:v=128'"; // 黑白
+//const char *filter_descr = "boxblur"; // 模糊
+//const char *filter_descr = "hflip"; // 视频镜像
+const char *filter_descr = "hue='h=60:s=-3'";
+//const char *filter_descr = "crop=2/3*in_w:2/3*in_h"; // TODO 为啥为会崩溃
 //const char *filter_descr = "drawbox=x=100:y=100:w=100:h=100:color=pink@0.5";
-const char *filter_descr = "scale=78:24,transpose=cclock";
+//const char *filter_descr = "scale=78:24,transpose=cclock";
 
 /**
  * 解码，线程回调
@@ -63,7 +63,8 @@ VideoChannel::VideoChannel(int id, AVCodecContext *avCodecContext, AVRational ti
 }
 
 VideoChannel::~VideoChannel() {
-    LOGD("");
+    LOGD("VideoChannel::~VideoChannel()");
+    DELETE(scaleFilter)
 }
 
 void VideoChannel::start() {
@@ -94,14 +95,10 @@ void VideoChannel::decode() {
 
     AVPacket *packet = 0; // AVPacket 专门存放 压缩数据（H264）
     while (isPlaying) {
-
-        // 生产快  消费慢
-        // 消费速度比生成速度慢（生成100，只消费10个，这样队列会爆）
-        // 内存泄漏点2，解决方案：控制队列大小
         if (isPlaying && frames.size() > 100) {
             // 休眠 等待队列中的数据被消费
             av_usleep(10 * 1000); // 微妙
-            LOGE("VideoChannel::decode() frames 数据有点多，睡一会儿");
+//            LOGD("VideoChannel::decode() frames 数据有点多，睡一会儿");
             continue;
         }
 
@@ -133,64 +130,69 @@ void VideoChannel::decode() {
         releaseAvPacket(&packet);
 
         // 代表了一个图像 (将这个图像先输出来)
-        AVFrame *filter_frame = av_frame_alloc(); // AVFrame 拿到解码后的原始数据包 （原始数据包，内部还是空的）
         AVFrame *frame = av_frame_alloc();
 
         // 从解码器中读取 解码后的数据包 AVFrame // 第三步： AVFrame 就有了值了 原始数据==YUV，最终打好的饭菜（原始数据）
         ret = avcodec_receive_frame(mAvCodecContext, frame);
 
-        // 字幕解码
-
         // 需要更多的数据才能够进行解码
         if (ret == AVERROR(EAGAIN)) {
             // 重来，重新取，没有取到关键帧，重试一遍
             releaseAvFrame(&frame); // 内存释放点
-            releaseAvFrame(&filter_frame); // 内存释放点
             LOGE("VideoChannel::decode() 重来，重新取，没有取到关键帧，重试一遍");
             continue;
         } else if (ret != 0) {
             // 释放规则：必须是后面不再使用了，才符合释放的要求
             releaseAvFrame(&frame); // 内存释放点
-            releaseAvFrame(&filter_frame); // 内存释放点
             break;
         }
 
-        LOGD("VideoChannel::decode() width=%d, height=%d linesize=%d", frame->width,
-             frame->height, frame->linesize[0]);
+//        LOGD("VideoChannel::decode() width=%d, height=%d linesize=%d",
+//             frame->width,
+//             frame->height,
+//             frame->linesize[0]
+//        );
 
-        // 滤镜输入
-        ret = av_buffersrc_add_frame_flags(scaleFilter->bufferSrc_ctx, frame,
-                                           AV_BUFFERSRC_FLAG_KEEP_REF);
-        if (ret < 0) {
-            LOGE("VideoChannel::decode() Error while feeding the filtergraph.");
-        } else {
-            LOGD("VideoChannel::decode() 输入滤镜成果");
-        }
+        // 滤镜方式
+        doFilter(frame);
+        releaseAvFrame(&frame);
 
-        // 滤镜输出
-        ret = av_buffersink_get_frame(scaleFilter->bufferSink_ctx, filter_frame);
-        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-            LOGE("VideoChannel::decode() 滤镜输出出问题了");
-            continue;
-        }
-        if (ret < 0) {
-            LOGE("VideoChannel::decode() Error while 滤镜输出");
-        } else {
-            LOGD("VideoChannel::decode() 取出滤镜成果");
-        }
-
-        // TODO AVPacket H264压缩数据 ----》 AVFrame YUV 原始数据
-        // 终于取到了，解码后的视频数据（原始数据）
-        // 再开一个线程 来播放 (流畅度)
-        frames.push(filter_frame); // 加入队列，为什么没有使用，无法满足"释放规则"
-
-        releaseAvFrame(&frame); // 内存释放点
+        // 无滤镜方式
+//        frames.push(frame);
     }
 
-    // 必须考虑的
-    // 出了循环，就要释放
-    // 释放规则：必须是后面不再使用了，才符合释放的要求
     releaseAvPacket(&packet);
+}
+
+void VideoChannel::doFilter(AVFrame *frame) {
+    if (!scaleFilter) {
+        return;
+    }
+
+    // 滤镜输入
+    int ret = av_buffersrc_add_frame_flags(scaleFilter->bufferSrc_ctx, frame,
+                                           AV_BUFFERSRC_FLAG_KEEP_REF
+    );
+    if (ret < 0) {
+        LOGE("VideoChannel::decode() Error while feeding the filtergraph.");
+    } else {
+//        LOGD("VideoChannel::decode() 输入滤镜成果");
+    }
+
+    AVFrame *filter_frame = av_frame_alloc();
+
+    // 滤镜输出
+    ret = av_buffersink_get_frame(scaleFilter->bufferSink_ctx, filter_frame);
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+        LOGE("VideoChannel::decode() 滤镜输出出问题了");
+    }
+    if (ret < 0) {
+        LOGE("VideoChannel::decode() Error while 滤镜输出");
+    } else {
+//        LOGD("VideoChannel::decode() 取出滤镜成果");
+    }
+
+    frames.push(filter_frame);
 }
 
 void VideoChannel::render() {
@@ -305,12 +307,7 @@ void VideoChannel::render() {
             // 说明：视频慢一写，音频快一些
             // 那就要，比音频播放的时间，快一点才行（追音频），追赶音频
             // 丢帧，把冗余的帧丢弃，就快起来了
-            // packtes  frames
-            // 同步丢包操作
-            // releaseAVFrame(&frame); 这样是不可以的
-
             this->frames.sync();
-
             // 继续 循环
             continue;
 
@@ -319,8 +316,6 @@ void VideoChannel::render() {
             LOGD("VideoChannel::render() 百分百完美 音频 视频 同步了");
         }
 
-        // 渲染，显示在屏幕上了
-        // 渲染的两种方式：
         // 渲染一帧图像（宽，高，数据）
         this->renderFrameCallback(
                 dst_data[0],
@@ -335,12 +330,6 @@ void VideoChannel::render() {
     releaseAvFrame(&frame);
 
     isPlaying = 0;
-
-    // todo 回收注意点：
-    // 1.一旦看到 "alloc" / "malloc" 关键字 ，满足释放规则的条件下，最后一定要尝试 xx_free()
-    // 2.如果看到 "xxxContext" 此上下文，通常情况下，是申请了内存，满足释放规则的条件下，最后一定要尝试 xx_free()
-    // 3.最后记得，标记归零 ，例如：isPlaying = 0;
-
     av_freep(&dst_data[0]);
 
     sws_freeContext(swsContext);
