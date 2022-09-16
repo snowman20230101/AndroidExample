@@ -124,11 +124,41 @@ static const int MAX_LOG_LENGTH = 16 * 1024;
 
 void log(const char *format, ...) CC_FORMAT_PRINTF(1, 2);
 
+/**
+ * 获取当前时间
+ *
+ * @return 返回毫秒 ms
+ */
 static long long GetSysCurrentTime() {
     struct timeval time;
     gettimeofday(&time, NULL);
+    // tv_usec 为 微妙， tv_sec 为 秒
     long long curTime = ((long long) (time.tv_sec)) * 1000 + time.tv_usec / 1000;
     return curTime;
+}
+
+/**
+ * 格式化当前时间
+ *
+ * @param sec 时间（秒）
+ * @return const char * 返回当前格式化的时间
+ */
+static const char *getTimeByHMS(time_t sec) {
+    char s[100];
+    tm *p = gmtime(&sec);
+//    tm *lp = localtime(&sec);
+    tm tmp = {0};
+    // 这里是保护，空指针
+    if (p) {
+        tmp = *p;
+    }
+
+    if (sec >= 3600) {
+        strftime(s, sizeof(s), "%H:%M:%S", &tmp);
+    } else {
+        strftime(s, sizeof(s), "%M:%S", &tmp);
+    }
+    return s;
 }
 
 class CommonInclude {

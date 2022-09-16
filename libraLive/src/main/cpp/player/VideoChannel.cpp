@@ -63,7 +63,7 @@ VideoChannel::VideoChannel(int id, AVCodecContext *avCodecContext, AVRational ti
 }
 
 VideoChannel::~VideoChannel() {
-    LOGD("VideoChannel::~VideoChannel()");
+    LOGI("VideoChannel::~VideoChannel()");
     DELETE(scaleFilter)
 }
 
@@ -94,6 +94,7 @@ void VideoChannel::decode() {
     LOGD("VideoChannel::decode() start isPlaying=%d", isPlaying);
 
     AVPacket *packet = 0; // AVPacket 专门存放 压缩数据（H264）
+    AVFrame *frame = av_frame_alloc();
     while (isPlaying) {
         if (isPlaying && frames.size() > 100) {
             // 休眠 等待队列中的数据被消费
@@ -127,10 +128,9 @@ void VideoChannel::decode() {
         }
 
         // 走到这里，就证明，packet，用完毕了，成功了（给“解码器上下文”发送Packet成功），那么就可以释放packet了
-        releaseAvPacket(&packet);
+        releaseAvPacket(packet);
 
         // 代表了一个图像 (将这个图像先输出来)
-        AVFrame *frame = av_frame_alloc();
 
         // 从解码器中读取 解码后的数据包 AVFrame // 第三步： AVFrame 就有了值了 原始数据==YUV，最终打好的饭菜（原始数据）
         ret = avcodec_receive_frame(mAvCodecContext, frame);
@@ -138,12 +138,14 @@ void VideoChannel::decode() {
         // 需要更多的数据才能够进行解码
         if (ret == AVERROR(EAGAIN)) {
             // 重来，重新取，没有取到关键帧，重试一遍
-            releaseAvFrame(&frame); // 内存释放点
+//            releaseAvFrame(&frame); // 内存释放点
+            av_frame_unref(frame);
             LOGE("VideoChannel::decode() 重来，重新取，没有取到关键帧，重试一遍, ret=%s", av_err2str(ret));
             continue;
         } else if (ret != 0) {
             // 释放规则：必须是后面不再使用了，才符合释放的要求
-            releaseAvFrame(&frame); // 内存释放点
+//            releaseAvFrame(&frame); // 内存释放点
+            av_frame_unref(frame);
             break;
         }
 
@@ -155,13 +157,15 @@ void VideoChannel::decode() {
 
         // 滤镜方式
         doFilter(frame);
-        releaseAvFrame(&frame);
+//        releaseAvFrame(&frame);
+        av_frame_unref(frame);
 
         // 无滤镜方式
 //        frames.push(frame);
     }
 
-    releaseAvPacket(&packet);
+    releaseAvFrame(frame);
+    releaseAvPacket(packet);
 }
 
 void VideoChannel::doFilter(AVFrame *frame) {
@@ -215,15 +219,6 @@ void VideoChannel::render() {
     uint8_t *dst_data[4];
     int dstStride[4];
 
-    // 为上面两个初始化，并且，设置尺寸基本信息
-    // int av_image_alloc(uint8_t *pointers[4], int linesizes[4], int w, int h, enum AVPixelFormat pix_fmt, int align);
-
-    // void av_image_copy(uint8_t *dst_data[4], int dst_linesizes[4],
-    //                   const uint8_t *src_data[4], const int src_linesizes[4],
-    //                   enum AVPixelFormat pix_fmt, int width, int height);
-//    av_image_copy();
-
-
     av_image_alloc(
             dst_data,
             dstStride,
@@ -247,9 +242,6 @@ void VideoChannel::render() {
             continue;
         }
 
-        // int sws_scale(struct SwsContext *c, const uint8_t *const srcSlice[], const int srcStride[],
-        //                  int srcSliceY, int srcSliceH, uint8_t *const dst[], const int dstStride[]);
-        // 一帧yuv 转换 一帧rgba
         // 格式的转换 (yuv --> rgba)   frame->out_buffers == yuv是原始数据      dst_data是rgba格式的数据
         // src_linesize: 表示每一行存放的 字节长度
         sws_scale(swsContext,
@@ -275,14 +267,17 @@ void VideoChannel::render() {
         // 得到最终 当前帧 时间延时时间
         double result_delay = extra_delay + base_delay;
 
-        // 等一等 音频
-        // av_usleep(result_delay * 1000000);
         // 拿到视频 frame timestamp estimated using various heuristics, in stream time base
-        this->videoTime = frame->best_effort_timestamp * av_q2d(this->time_base);
-//        LOGE("videoTime=%lld", frame->best_effort_timestamp);
+        this->videoTime = frame->best_effort_timestamp *
+                          av_q2d(this->time_base); // timestamp(秒) = pts * av_q2d(time_base)
 
         // 拿到音频 播放时间基 audioChannel.audioTime
         double_t audioTime = this->audioChannel->audioTime; // 音频那边的值，是根据它来计算的
+        LOGE("best_effort_timestamp=%lld, extra_delay=%f, audioTime=%f, videoTime=%f, pts=%lld, pkt_dts=%lld",
+             frame->best_effort_timestamp,
+             extra_delay, audioTime, videoTime,
+             frame->pts, frame->pkt_dts
+        );
 
         // 计算 音频 和 视频的 差值
         double time_diff = videoTime - audioTime;
@@ -321,10 +316,10 @@ void VideoChannel::render() {
                 mAvCodecContext->height
         );
 
-        releaseAvFrame(&frame); // 渲染完了，frame没用了，释放掉
+        releaseAvFrame(frame); // 渲染完了，frame没用了，释放掉
     }
 
-    releaseAvFrame(&frame);
+    releaseAvFrame(frame);
 
     isPlaying = 0;
     av_freep(&dst_data[0]);
@@ -369,7 +364,7 @@ void dropAvFrame(std::queue<AVFrame *> &q) {
     if (!q.empty()) {
         LOGD("VideoChannel:: dropAvFrame() AVFrame queue size %d", q.size());
         AVFrame *frame = q.front();
-        BaseChannel::releaseAvFrame(&frame);
+        BaseChannel::releaseAvFrame(frame);
         q.pop();
     }
 }
@@ -377,11 +372,13 @@ void dropAvFrame(std::queue<AVFrame *> &q) {
 void dropAvPacket(std::queue<AVPacket *> &qq) {
     if (!qq.empty()) {
         AVPacket *packet = qq.front();
-        LOGD("VideoChannel:: dropAvFrame() AVPacket queue size %d flags is %d", qq.size(),
-             packet->flags);
+        LOGD("VideoChannel:: dropAvPacket() AVPacket queue size %d flags is %d",
+             qq.size(),
+             packet->flags
+        );
         // BaseChannel::releaseAVPacket(&packet); // 关键帧没有了
         if (packet->flags != AV_PKT_FLAG_KEY) { // AV_PKT_FLAG_KEY == 关键帧
-            BaseChannel::releaseAvPacket(&packet);
+            BaseChannel::releaseAvPacket(packet);
         }
         qq.pop();
     }

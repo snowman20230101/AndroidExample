@@ -16,7 +16,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                arguments '-DANDROID_TOOLCHAIN=clang', '-DANDROID_ARM_MODE=arm', '-DANDROID_STL=c++_static'
+                arguments '-DANDROID_TOOLCHAIN=clang', '-DANDROID_ARM_MODE=arm', '-DANDROID_STL=c++_static', '-DANDROID_ARM_NEON=ON'
                 cppFlags '-std=c++11'
                 abiFilters "armeabi-v7a" // 指定本地库的cpu架构
             }

@@ -20,9 +20,9 @@ public:
 
     virtual void stop();
 
-    static void releaseAvFrame(AVFrame **frame);
+    static void releaseAvFrame(AVFrame *&frame);
 
-    static void releaseAvPacket(AVPacket **packet);
+    static void releaseAvPacket(AVPacket *&packet);
 
 public:
     int id;

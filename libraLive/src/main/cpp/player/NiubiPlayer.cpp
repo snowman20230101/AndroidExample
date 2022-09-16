@@ -5,20 +5,41 @@
 
 #include "NiubiPlayer.h"
 
+/**
+ * 线程回调 准备解码器，解封装
+ *
+ * @param obj
+ * @return
+ */
 void *task_init_prepare(void *obj);
 
+/**
+ * 线程回调 开始解码（其实是文件解封装）
+ *
+ * @param obj
+ * @return
+ */
 void *task_init_start(void *obj);
 
+/**
+ * 线程回调 停止解码
+ *
+ * @param obj
+ * @return
+ */
 void *task_init_stop(void *obj);
 
-NiubiPlayer::NiubiPlayer(const char *source, JavaCallHelper *helper) {
-    this->callHelper = helper;
+NiubiPlayer::NiubiPlayer(const char *source, JavaVM *vm, JNIEnv *env, jobject instance) {
+    LOGD("NiubiPlayer::NiubiPlayer()");
+    this->callHelper = new JavaCallHelper(vm, env, instance);
     this->dataSource = new char[strlen(source) + 1];
     strcpy(this->dataSource, source);
 }
 
 NiubiPlayer::~NiubiPlayer() {
+    LOGI("NiubiPlayer::~NiubiPlayer()");
     DELETE(this->dataSource)
+    DELETE(this->callHelper)
 }
 
 void NiubiPlayer::prepare() {
@@ -28,30 +49,12 @@ void NiubiPlayer::prepare() {
 void NiubiPlayer::init_prepare() {
     avformat_network_init();
 
-    // TODO 第一步：打开媒体地址（文件路径 、 直播地址）
-    // 可以初始为NULL，如果初始为NULL，当执行avformat_open_input函数时，内部会自动申请avformat_alloc_context，这里干脆手动申请
-    // 封装了媒体流的格式信息
     this->formatContext = avformat_alloc_context();
-
     AVDictionary *options = NULL;
     av_dict_set(&options, "timeout", "50000", 0);
-//    av_dict_set(&options, "buffer_size", "1024000", 0); // 设置缓存大小,1080p可将值跳到最大
-//    av_dict_set(&options, "rtsp_transport", "tcp", 0); // 以tcp的方式打开,
-//    av_dict_set(&options, "stimeout", "5000000", 0); // 设置超时断开链接时间，单位us
-//    av_dict_set(&options, "max_delay", "500000", 0); // 设置最大时延
-
     LOGE("dataSource is %s", this->dataSource);
 
-    // 1、打开媒体地址(文件地址、直播地址) AVFormatContext  包含了 视频的 信息(宽、高等)
-    /**
-     * 1.AVFormatContext 二级指针
-     * 2.媒体文件路径，或，直播地址   注意：this->data_source; 这样是拿不到的，所以需要把this传递到pVoid
-     * 3.输入的封装格式：一般是让ffmpeg自己去检测，所以给了一个0
-     * 4.参数
-     */
-    int ret = avformat_open_input(&this->formatContext, this->dataSource, 0, 0);
-
-    // TODO 注意：字典使用过后，一定要去释放
+    int ret = avformat_open_input(&this->formatContext, this->dataSource, 0, &options);
     av_dict_free(&options); // 释放字典
 
     if (ret != 0) {
@@ -69,29 +72,24 @@ void NiubiPlayer::init_prepare() {
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_FIND_STREAMS);
     }
 
-    fprintf(stdout, "dictionary count: %d\n", av_dict_count(this->formatContext->metadata));
-    AVDictionaryEntry *entry = nullptr;
-    while ((entry = av_dict_get(this->formatContext->metadata, "", entry, AV_DICT_IGNORE_SUFFIX))) {
-        fprintf(stdout, "key: %s, value: %s\n", entry->key, entry->value);
-    }
+    this->duration = formatContext->duration / 1000000; // 视频时长（单位：微秒us，转换为秒需要除以1000000）
 
-    // TODO 第三步：根据流信息，流的个数，循环查找， 音频流 视频流
+//    fprintf(stdout, "dictionary count: %d\n", av_dict_count(this->formatContext->metadata));
+//    AVDictionaryEntry *entry = nullptr;
+//    while ((entry = av_dict_get(this->formatContext->metadata, "", entry, AV_DICT_IGNORE_SUFFIX))) {
+//        fprintf(stdout, "key: %s, value: %s\n", entry->key, entry->value);
+//    }
+
     for (int i = 0; i < this->formatContext->nb_streams; ++i) {
-        // TODO 第四步：获取媒体流（视频、音频） 从封装格式上下文获取流对象
         AVStream *avStream = this->formatContext->streams[i];
-        // TODO 第五步：从stream流中获取解码这段流的参数信息，区分到底是 音频 还是 视频
         AVCodecParameters *codecParameters = avStream->codecpar;
-
-        // TODO 第六步：通过流的编解码参数中编解码ID，来获取当前流的解码器
         AVCodec *avCodec = avcodec_find_decoder(codecParameters->codec_id);
-        // 虽然在第六步，已经拿到当前流的解码器了，但可能不支持解码这种解码方式
         if (avCodec == NULL) {
             LOGE("查找解码器失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_FIND_DECODER_FAIL);
             return;
         }
 
-        // TODO 第七步：通过 拿到的解码器，获取解码器上下文
         AVCodecContext *avCodecContext = avcodec_alloc_context3(avCodec);
         if (avCodecContext == NULL) {
             LOGE("创建解码上下文失败:%s", av_err2str(ret));
@@ -99,7 +97,6 @@ void NiubiPlayer::init_prepare() {
             return;
         }
 
-        // TODO 第八步：给解码器上下文 设置参数 (内部会让编解码器上下文初始化)
         ret = avcodec_parameters_to_context(avCodecContext, codecParameters);
         if (ret < 0) {
             LOGE("设置解码上下文参数失败:%s", av_err2str(ret));
@@ -107,7 +104,6 @@ void NiubiPlayer::init_prepare() {
             return;
         }
 
-        // TODO 第九步：打开解码器
         ret = avcodec_open2(avCodecContext, avCodec, 0);
         if (ret != 0) {
             LOGE("打开解码器失败:%s", av_err2str(ret));
@@ -117,18 +113,22 @@ void NiubiPlayer::init_prepare() {
 
         // AVStream 媒体流中就可以拿到时间基 (音视频同步)
         AVRational time_base = avStream->time_base;
+        AVRational codec_time_base = av_stream_get_codec_timebase(avStream);
         const char *codecName = avcodec_get_name(codecParameters->codec_id);
 
         // // 视频流时间基 分子=1, 分母=25000
-        LOGI("NiubiPlayer::init_prepare() codecName=%s, 分子=%d, 分母=%d",
+        LOGI("NiubiPlayer::init_prepare() codecName=%s, 分子=%d, 分母=%d, duration=%s, %lld, %d, %d",
              codecName,
              time_base.num,
-             time_base.den
+             time_base.den,
+             getTimeByHMS(duration),
+             duration,
+             codec_time_base.num,
+             codec_time_base.den
         );
 
 //        av_dump_format(this->formatContext, 0, this->dataSource, 0);
 
-        // TODO 第十步：从编码器参数中获取流类型codec_type
         if (codecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {
             // 获取视频相关的 fps
             // 平均帧率 == 时间基
@@ -149,7 +149,6 @@ void NiubiPlayer::init_prepare() {
         }
     }
 
-    // TODO 第十一步：如果流中 没有音频 也 没有视频
     if (!audioChannel && !videoChannel) {
         LOGE("没有音视频");
         callHelper->onError(THREAD_CHILD, FFMPEG_NO_MEDIA);
@@ -158,7 +157,6 @@ void NiubiPlayer::init_prepare() {
 
     LOGD("NiubiPlayer::init_prepare() successful.");
 
-    // TODO 第十二步：要么有音频，要么有视频，要么音视频都有
     callHelper->onPrepare(THREAD_CHILD);
 }
 
@@ -183,18 +181,17 @@ void NiubiPlayer::init_start() {
 
     int ret;
     while (isPlaying) {
-        // TODO 由于我们的操作是在异步线程，那就好办了，等待（先让消费者消费掉，然后在生产）
         if (audioChannel && audioChannel->packets.size() > 100) {
             // 10ms
             av_usleep(1000 * 10);
-            LOGD("NiubiPlayer::init_start() audio packets size is %d 多了，睡一会儿",
-                 audioChannel->packets.size());
+//            LOGD("NiubiPlayer::init_start() audio packets size is %d 多了，睡一会儿",
+//                 audioChannel->packets.size());
             continue;
         }
         if (videoChannel && videoChannel->packets.size() > 100) {
             av_usleep(1000 * 10);
-            LOGD("NiubiPlayer::init_start() video packets size is %d 多了，睡一会儿",
-                 videoChannel->packets.size());
+//            LOGD("NiubiPlayer::init_start() video packets size is %d 多了，睡一会儿",
+//                 videoChannel->packets.size());
             continue;
         }
 
@@ -216,7 +213,7 @@ void NiubiPlayer::init_start() {
             }
         } else if (ret == AVERROR_EOF) {
             // 读取完成 但是可能还没播放完
-            BaseChannel::releaseAvPacket(&packet);
+            BaseChannel::releaseAvPacket(packet);
             if (audioChannel->packets.empty() && audioChannel->frames.empty()
                 && videoChannel->packets.empty() && videoChannel->frames.empty()) {
                 LOGE("NiubiPlayer::init_start() packets empty. frame empty. ret=%s",
@@ -231,7 +228,7 @@ void NiubiPlayer::init_start() {
         } else {
             // 代表失败了，有问题
             LOGD("代表失败了，有问题");
-            BaseChannel::releaseAvPacket(&packet);
+            BaseChannel::releaseAvPacket(packet);
             break;
         }
     } // while end
@@ -252,6 +249,22 @@ void NiubiPlayer::stop() {
     this->isPlaying = 0;
     this->callHelper = 0;
     pthread_create(&pid_stop, 0, task_init_stop, this);
+}
+
+void NiubiPlayer::init_stop() {
+    LOGD("NiubiPlayer::init_stop() 释放播放器资源");
+    // 等待 prepare 结束
+    pthread_join(pid_pre, 0);
+
+    // 保证 start 线程结束
+    pthread_join(pid_play, 0);
+
+    DELETE(videoChannel)
+    DELETE(audioChannel)
+    DELETE(callHelper)
+
+    // 释放封装格式上下文
+    releaseFormatContext();
 }
 
 void NiubiPlayer::releaseFormatContext() {
@@ -275,31 +288,16 @@ void *task_init_start(void *obj) {
     if (player) {
         player->init_start();
     }
-
     return 0;
 }
 
 void *task_init_stop(void *obj) {
-    LOGE("NiubiPlayer task_stop()");
-
     NiubiPlayer *player = static_cast<NiubiPlayer *>(obj);
-
     if (player) {
-        // 等待 prepare 结束
-        pthread_join(player->pid_pre, 0);
-
-        // 保证 start 线程结束
-        pthread_join(player->pid_play, 0);
-
-        DELETE(player->videoChannel)
-        DELETE(player->audioChannel)
-
-        // 释放封装格式上下文
-        player->releaseFormatContext();
-
-        DELETE(player)
+        player->init_stop();
     }
 
+    DELETE(player)
     return 0;
 }
 

@@ -11,61 +11,25 @@ extern "C" {
 
 static const char *filter_descr = "aresample=8000,aformat=sample_fmts=s16:channel_layouts=mono";
 
-// 声明并且实现
+/**
+ * 线程回调
+ *
+ * @param args
+ * @return
+ */
 void *audio_decode(void *args);
 
-void *audio_play(void *args);
-
-static int get_format_from_sample_fmt(const char **fmt,
-                                      enum AVSampleFormat sample_fmt) {
-    int i;
-    struct sample_fmt_entry {
-        enum AVSampleFormat sample_fmt;
-        const char *fmt_be, *fmt_le;
-    } sample_fmt_entries[] = {
-            {AV_SAMPLE_FMT_U8,  "u8",    "u8"},
-            {AV_SAMPLE_FMT_S16, "s16be", "s16le"},
-            {AV_SAMPLE_FMT_S32, "s32be", "s32le"},
-            {AV_SAMPLE_FMT_FLT, "f32be", "f32le"},
-            {AV_SAMPLE_FMT_DBL, "f64be", "f64le"},
-    };
-    *fmt = NULL;
-
-    for (i = 0; i < FF_ARRAY_ELEMS(sample_fmt_entries); i++) {
-        struct sample_fmt_entry *entry = &sample_fmt_entries[i];
-        if (sample_fmt == entry->sample_fmt) {
-            *fmt = AV_NE(entry->fmt_be, entry->fmt_le);
-            return 0;
-        }
-    }
-
-    fprintf(stderr,
-            "Sample format %s not supported as output format\n",
-            av_get_sample_fmt_name(sample_fmt)
-    );
-    return AVERROR(EINVAL);
-}
-
 /**
- * Fill dst buffer with nb_samples, generated starting from t.
+ * 线程回调
+ *
+ * @param args
+ * @return
  */
-static void fill_samples(double *dst, int nb_samples, int nb_channels, int sample_rate, double *t) {
-    int i, j;
-    double tincr = 1.0 / sample_rate, *dstp = dst;
-    const double c = 2 * M_PI * 440.0;
-
-    /* generate sin tone with 440Hz frequency and duplicated channels */
-    for (i = 0; i < nb_samples; i++) {
-        *dstp = sin(c * *t);
-        for (j = 1; j < nb_channels; j++)
-            dstp[j] = dstp[0];
-        dstp += nb_channels;
-        *t += tincr;
-    }
-}
+void *audio_play(void *args);
 
 AudioChannel::AudioChannel(int id, AVCodecContext *avCodecContext, AVRational time_base)
         : BaseChannel(id, avCodecContext, time_base) {
+    LOGD("AudioChannel::AudioChannel");
     this->id = id;
     this->mAvCodecContext = avCodecContext;
     this->time_base = time_base;
@@ -119,42 +83,18 @@ AudioChannel::AudioChannel(int id, AVCodecContext *avCodecContext, AVRational ti
     int ret = swr_init(swrContext);
     if (ret < 0) {
         LOGE("AudioChannel::AudioChannel() Failed to initialize the swr_init context ret=%s",
-             av_err2str(ret));
+             av_err2str(ret)
+        );
     }
-
-    // converted input samples 转换输入样本
-//    max_dst_nb_samples = dst_nb_samples = av_rescale_rnd(
-//            src_nb_samples,
-//            out_sample_rate,
-//            mAvCodecContext->sample_rate,
-//            AV_ROUND_UP
-//    );
-//
-//    LOGE("AudioChannel: max_dst_nb_samples=%lld", max_dst_nb_samples);
-//
-//    // 输 出
-//    av_samples_alloc_array_and_samples(
-//            &dst_data,
-//            &dst_linesize,
-//            out_channels,
-//            (int) dst_nb_samples,
-//            dst_sample_fmt,
-//            0
-//    );
-//
-//    LOGE("AudioChannel: dst_linesize=%d", dst_linesize);
 }
 
 AudioChannel::~AudioChannel() {
+    LOGI("AudioChannel::~AudioChannel");
     if (out_buffers) {
         free(out_buffers);
         out_buffers = 0;
     }
-
-//    if (dst_data) {
-//        av_free(dst_data);
-//        dst_data = 0;
-//    }
+    DELETE(audioFilter)
 }
 
 void AudioChannel::start() {
@@ -201,7 +141,7 @@ void AudioChannel::decode() {
         // 把包丢给解码器
         ret = avcodec_send_packet(mAvCodecContext, packet);
 
-        releaseAvPacket(&packet);
+        releaseAvPacket(packet);
         // 重试
         if (ret != 0) {
             // 失败了（给”解码器上下文“发送Packet失败）
@@ -217,28 +157,28 @@ void AudioChannel::decode() {
             // 在此状态下，输出不可用——用户必须尝试发送新的输入
             LOGE("AudioChannel::decode() output is not available in this state - "
                  "user must try to send new input ret=%s", av_err2str(ret));
-            releaseAvFrame(&frame);
+            releaseAvFrame(frame);
             continue;
         } else if (ret == AVERROR_EOF) {
             LOGE("AudioChannel::decode() the decoder has been fully flushed, and there will be"
                  "no more output frames. ret=%s", av_err2str(ret));
-            releaseAvFrame(&frame);
+            releaseAvFrame(frame);
             continue;
         } else if (ret == AVERROR(EINVAL)) {
             LOGE("AudioChannel::decode() codec not opened, or it is an encoder. ret=%s",
                  av_err2str(ret)
             );
-            releaseAvFrame(&frame);
+            releaseAvFrame(frame);
             continue;
         } else if (ret == AVERROR_INPUT_CHANGED) {
             LOGE("AudioChannel::decode() current decoded frame has changed parameters"
                  " with respect to first decoded frame. Applicable"
                  " when flag AV_CODEC_FLAG_DROPCHANGED is set. ret=%s", av_err2str(ret));
-            releaseAvFrame(&frame);
+            releaseAvFrame(frame);
             continue;
         } else if (ret != 0) {
             LOGE("AudioChannel::decode() error. ret=%s", av_err2str(ret));
-            releaseAvFrame(&frame);
+            releaseAvFrame(frame);
             break;
         }
 
@@ -249,7 +189,7 @@ void AudioChannel::decode() {
         frames.push(frame);
     }
 
-    releaseAvPacket(&packet);
+    releaseAvPacket(packet);
 }
 
 void AudioChannel::doFilter(AVFrame *frame) {
@@ -287,7 +227,7 @@ int AudioChannel::getPcm() {
 
     if (!isPlaying) {
         if (ret) {
-            releaseAvFrame(&frame);
+            releaseAvFrame(frame);
         }
 
         return pcm_data_size;
@@ -360,7 +300,7 @@ int AudioChannel::getPcm() {
     // 获得 相对播放这一段数据的秒数
     this->audioTime = (double) frame->best_effort_timestamp * av_q2d(time_base);
 
-    releaseAvFrame(&frame);
+    releaseAvFrame(frame);
 
     return pcm_data_size;
 }

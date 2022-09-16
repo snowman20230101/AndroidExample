@@ -7,6 +7,7 @@
 
 #include <pthread.h>
 #include <queue>
+#include <android/log.h>
 
 /**
  * 消息处理封装
@@ -15,7 +16,7 @@
 
 template<typename T>
 class message_queue {
-    typedef void (*ReleaseCallBack)(T *);
+    typedef void (*ReleaseCallBack)(T &);
 
     typedef void (*SyncHandle)(std::queue<T> &);
 
@@ -32,6 +33,7 @@ public:
 
     /**
      * push 数据
+     *
      * @param value
      */
     void push(T value) {
@@ -40,8 +42,11 @@ public:
             queue.push(value);
             pthread_cond_signal(&cond);
         } else {
-            if (releaseCallBack)
-                releaseCallBack(&value);
+            __android_log_print(ANDROID_LOG_DEBUG, "FFMPEG", "push() 无法加入数据 queue size is %d",
+                                queue.size()
+            );
+//            if (releaseCallBack)
+                releaseCallBack(value);
         }
 
         pthread_mutex_unlock(&mutex);
@@ -49,17 +54,16 @@ public:
 
     /**
      * 取出消息
+     *
      * @param value
      * @return
      */
     int pop(T &value) {
         int ret = 0;
-
         pthread_mutex_lock(&mutex);
-
         // 在多核处理器下 由于竞争可能虚假唤醒 包括jdk也说明了
         while (state && queue.empty()) {
-            pthread_cond_wait(&cond, &mutex);
+            pthread_cond_wait(&cond, &mutex); // 释放锁的等待。
         }
 
         if (!queue.empty()) {
@@ -67,9 +71,7 @@ public:
             queue.pop();
             ret = 1;
         }
-
         pthread_mutex_unlock(&mutex);
-
         return ret;
     }
 
@@ -82,15 +84,15 @@ public:
     }
 
     void clear() {
+        __android_log_print(ANDROID_LOG_DEBUG, "FFMPEG", "message_queue.h clear()");
         pthread_mutex_lock(&mutex);
 
         while (!queue.empty()) {
             T value = queue.front();
-            if (releaseCallBack)
-                releaseCallBack(&value);
+//            if (releaseCallBack)
+                releaseCallBack(value);
             queue.pop();
         }
-
         pthread_mutex_unlock(&mutex);
     }
 
@@ -118,7 +120,7 @@ public:
 
     void sync() {
         pthread_mutex_lock(&mutex);
-        if (syncHandle)
+//        if (syncHandle)
             syncHandle(queue);
         pthread_mutex_unlock(&mutex);
     }

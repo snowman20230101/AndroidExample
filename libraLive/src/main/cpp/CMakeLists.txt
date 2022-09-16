@@ -8,12 +8,22 @@ add_subdirectory(breakpad)
 set(RTMP ${CMAKE_SOURCE_DIR}/rtmp)
 set(ffmpeg ${CMAKE_SOURCE_DIR}/ffmpeg)
 
+# 支持 neon 汇编编译
+#if (ANDROID_ABI STREQUAL armeabi-v7a)
+#    set_target_properties(libralive PROPERTIES COMPILE_FLAGS -mfpu=neon)
+#endif ()
+
+# 可以是特定文件
+#if(ANDROID_ABI STREQUAL armeabi-v7a)
+#    set_source_files_properties(foo.cpp PROPERTIES COMPILE_FLAGS -mfpu=neon)
+#endif()
+
 # 引入c/c++编译源文件
 file(GLOB source_file *.cpp
-#        ffmpeg/examples/decode_video.c
-#        ffmpeg/examples/filtering_video.c
-#        ffmpeg/examples/filtering_audio.c
-#        ffmpeg/examples/filter_audio.c
+        #        ffmpeg/examples/decode_video.c
+        #        ffmpeg/examples/filtering_video.c
+        #        ffmpeg/examples/filtering_audio.c
+        #        ffmpeg/examples/filter_audio.c
         player/*.cpp
         player/VideoChannel.cpp
         player/render/*.cpp
@@ -24,7 +34,7 @@ file(GLOB source_file *.cpp
         util/*.cpp
         egl/*.cpp
         looper/*.cpp
-#        egl/OffscreenSurface.cpp
+                egl/OffscreenSurface.cpp
         )
 
 # 引入头文件

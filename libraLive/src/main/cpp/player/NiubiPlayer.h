@@ -13,19 +13,24 @@
 class NiubiPlayer {
 
 public:
-    NiubiPlayer(const char *source, JavaCallHelper *helper);
+    NiubiPlayer(const char *source, JavaVM *vm, JNIEnv *env, jobject instance);
 
     ~NiubiPlayer();
 
     void prepare();
 
+    // 线程
     void init_prepare();
 
     void start();
 
+    // 线程
     void init_start();
 
     void stop();
+
+    // 线程
+    void init_stop();
 
     void setRenderFrameCallBack(RenderFrameCallback renderFrameCallback);
 
@@ -44,7 +49,7 @@ public:
     char *dataSource;
 
     // java 调用
-    JavaCallHelper *callHelper;
+    JavaCallHelper *callHelper = NULL;
 
     int isPlaying{0};
 
@@ -53,6 +58,8 @@ public:
 
     AVFormatContext *formatContext = NULL;
     RenderFrameCallback renderFrameCallBack{};
+
+    int64_t duration = 0;
 };
 
 

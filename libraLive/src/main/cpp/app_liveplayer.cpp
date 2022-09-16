@@ -14,7 +14,6 @@ ANativeWindow *window = NULL;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 NiubiPlayer *player = NULL;
-JavaCallHelper *javaCallHelper;
 
 /**
  * 绘制回调
@@ -28,8 +27,7 @@ void renderFrameCallBack(uint8_t *src_data, int src_lineSize, int w, int ht);
 static void com_windy_libralive_LibraPlayer_native_prepare(JNIEnv *env, jobject object,
                                                            jstring data_source) {
     const char *source = env->GetStringUTFChars(data_source, 0);
-    javaCallHelper = new JavaCallHelper(javaVM, env, object);
-    player = new NiubiPlayer(source, javaCallHelper);
+    player = new NiubiPlayer(source, javaVM, env, object);
     player->setRenderFrameCallBack(renderFrameCallBack);
     player->prepare();
     env->ReleaseStringUTFChars(data_source, source);
@@ -45,17 +43,16 @@ static void com_windy_libralive_LibraPlayer_native_stop(JNIEnv *env, jobject obj
     if (player) {
         player->stop();
     }
-
-    DELETE(javaCallHelper);
 }
 
 static void com_windy_libralive_LibraPlayer_native_release(JNIEnv *env, jobject object) {
+    LOGI("native_release() ANativeWindow_release()");
     pthread_mutex_lock(&mutex);
     if (window) {
         ANativeWindow_release(window);
         window = 0;
     }
-
+//    DELETE(player)
     pthread_mutex_unlock(&mutex);
 }
 
@@ -70,12 +67,9 @@ static void com_windy_libralive_LibraPlayer_native_setSurface(JNIEnv *env, jobje
     }
 
     window = ANativeWindow_fromSurface(env, surface);
-
     int32_t width = ANativeWindow_getWidth(window);
     int32_t height = ANativeWindow_getHeight(window);
-
     LOGD("native_setSurface() width=%d, height=%d", width, height);
-
     pthread_mutex_unlock(&mutex);
 }
 

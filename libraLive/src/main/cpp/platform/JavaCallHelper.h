@@ -22,6 +22,7 @@ private:
     JavaVM *vm;
     JNIEnv *env;
     jobject instance;
+    jclass clazz;
     jmethodID onErrorId;
     jmethodID onPrepareId;
 };
