@@ -5,7 +5,6 @@
 #include "Utils.h"
 #include "CommonInclude.h"
 
-
 bool DumpCallback(const google_breakpad::MinidumpDescriptor &descriptor,
                   void *context, bool succeeded) {
     LOGE("ndk_crash Dump path: %s", descriptor.path());

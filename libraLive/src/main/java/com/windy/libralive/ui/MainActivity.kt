@@ -20,12 +20,6 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 开启ndk监控
-        val file = File(externalCacheDir, "native_crash")
-        if (!file.exists()) {
-            file.mkdir()
-        }
-        NativeCaseTesting.initBreakPad(file.absolutePath)
 
         viewModel =
             ViewModelProvider(this, defaultViewModelProviderFactory)[MainVewModel::class.java]

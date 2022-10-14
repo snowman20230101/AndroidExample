@@ -6,6 +6,8 @@ extern "C" {
 #include <librtmp/rtmp.h>
 }
 
+
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_windy_libralive_external_NativeCaseTesting_00024Companion_stringFromJNI(JNIEnv *env,
                                                                                  jobject /* this */) {
@@ -40,8 +42,6 @@ Java_com_windy_libralive_external_NativeCaseTesting_00024Companion_stringFromJNI
     strcat(strBuffer, "\navcodec_license : ");
     strcat(strBuffer, avcodec_license());
     LOGE("GetFFmpegVersion\n%s", strBuffer);
-
-    LOGE("avcodec_configure=%s", avcodec_configuration());
 
     return env->NewStringUTF(hello.c_str());
 }
@@ -157,8 +157,11 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_windy_libralive_external_NativeCaseTesting_00024Companion_initBreakPad(JNIEnv *env,
                                                                                 jobject thiz,
-                                                                                jstring path) {
-    const char *c_path = env->GetStringUTFChars(path, JNI_FALSE);
-    Utils::initBreakPad(c_path);
-    env->ReleaseStringUTFChars(path, c_path);
+                                                                                jstring breakPadPath, jstring logPath) {
+    const char *c_breakPadPath = env->GetStringUTFChars(breakPadPath, JNI_FALSE);
+    const char *c_log_path = env->GetStringUTFChars(logPath, JNI_FALSE);
+    Utils::initBreakPad(c_breakPadPath);
+    strlcpy(appLogPath, c_log_path, strlen(c_log_path) + 1);
+    env->ReleaseStringUTFChars(breakPadPath, c_breakPadPath);
+    env->ReleaseStringUTFChars(logPath, c_log_path);
 }

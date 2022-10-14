@@ -7,8 +7,6 @@
 
 // android 头文件
 #include <jni.h>
-#include <android/log.h>
-#include <sys/time.h>
 
 // 标准库
 #include <cstring>
@@ -16,12 +14,14 @@
 #include <cstdio>
 #include <cstdint>
 #include <cassert>
-#include <thread>
+#include <iostream>
 
 #include <malloc.h>
 
 // 自己工程
 #include "message_queue.h"
+#include "TimeExt.h"
+#include "Logger.h"
 
 // openGL 数学
 #include <glm.hpp>
@@ -50,14 +50,8 @@ extern "C" {
 #include <libavutil/dict.h>
 }
 
-// 日志系统
-#define TAG_FFMPEG "FFMPEG"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG_FFMPEG, __VA_ARGS__)
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG_FFMPEG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, TAG_FFMPEG, __VA_ARGS__)
-
 // 宏函数
-#define DELETE(obj) if(obj){ delete obj; obj = 0; }
+#define DELETE(obj) if(obj) { delete obj; obj = 0; }
 
 // 标记线程 因为子线程需要attach
 #define THREAD_MAIN 1
@@ -78,92 +72,5 @@ extern "C" {
 #define FFMPEG_OPEN_DECODER_FAIL 7
 // 没有音视频
 #define FFMPEG_NO_MEDIA 8
-
-#define FUN_BEGIN_TIME(FUN) {\
-    LOGE("%s:%s func start", __FILE__, FUN); \
-    long long t0 = GetSysCurrentTime();
-
-#define FUN_END_TIME(FUN) \
-    long long t1 = GetSysCurrentTime(); \
-    LOGE("%s:%s func cost time %ldms", __FILE__, FUN, (long)(t1-t0));}
-
-#define BEGIN_TIME(FUN) {\
-    LOGE("%s func start", FUN); \
-    long long t0 = GetSysCurrentTime();
-
-#define END_TIME(FUN) \
-    long long t1 = GetSysCurrentTime(); \
-    LOGE("%s func cost time %ldms", FUN, (long)(t1-t0));}
-
-#define GO_CHECK_GL_ERROR(...)  LOGE("CHECK_GL_ERROR %s glGetError = %d, line = %d, ",  __FUNCTION__, glGetError(), __LINE__)
-
-#define DEBUG_LOGCATE(...)  LOGE("DEBUG_LOGCATE %s line = %d",  __FUNCTION__, __LINE__)
-
-
-#define COCOS2D_DEBUG 1
-
-#if defined(__GNUC__) && (__GNUC__ >= 4)
-#define CC_FORMAT_PRINTF(formatPos, argPos) __attribute__((__format__(printf, formatPos, argPos)))
-#elif defined(__has_attribute)
-#if __has_attribute(format)
-#define CC_FORMAT_PRINTF(formatPos, argPos) __attribute__((__format__(printf, formatPos, argPos)))
-#endif // __has_attribute(format)
-#else
-#define CC_FORMAT_PRINTF(formatPos, argPos)
-#endif
-
-#if COCOS2D_DEBUG == 1
-#define CCLOG(format, ...)      cocos2d::log(format, ##__VA_ARGS__)
-#define CCLOGERROR(format, ...)  cocos2d::log(format, ##__VA_ARGS__)
-#define CCLOGINFO(format, ...)   do {} while (0)
-#define CCLOGWARN(...) __CCLOGWITHFUNCTION(__VA_ARGS__)
-#endif // COCOS2D_DEBUG
-
-
-static const int MAX_LOG_LENGTH = 16 * 1024;
-
-void log(const char *format, ...) CC_FORMAT_PRINTF(1, 2);
-
-/**
- * 获取当前时间
- *
- * @return 返回毫秒 ms
- */
-static long long GetSysCurrentTime() {
-    struct timeval time;
-    gettimeofday(&time, NULL);
-    // tv_usec 为 微妙， tv_sec 为 秒
-    long long curTime = ((long long) (time.tv_sec)) * 1000 + time.tv_usec / 1000;
-    return curTime;
-}
-
-/**
- * 格式化当前时间
- *
- * @param sec 时间（秒）
- * @return const char * 返回当前格式化的时间
- */
-static const char *getTimeByHMS(time_t sec) {
-    char s[100];
-    tm *p = gmtime(&sec);
-//    tm *lp = localtime(&sec);
-    tm tmp = {0};
-    // 这里是保护，空指针
-    if (p) {
-        tmp = *p;
-    }
-
-    if (sec >= 3600) {
-        strftime(s, sizeof(s), "%H:%M:%S", &tmp);
-    } else {
-        strftime(s, sizeof(s), "%M:%S", &tmp);
-    }
-    return s;
-}
-
-class CommonInclude {
-public:
-    CommonInclude();
-};
 
 #endif //LIBRALIVE_COMMONINCLUDE_H

@@ -443,12 +443,14 @@ void AudioChannel::stop() {
 
 void *audio_decode(void *args) {
     AudioChannel *audioChannel = static_cast<AudioChannel *>(args);
-    audioChannel->decode();
+    if (audioChannel)
+        audioChannel->decode();
     return 0;
 }
 
 void *audio_play(void *args) {
     AudioChannel *audioChannel = static_cast<AudioChannel *>(args);
-    audioChannel->init_start();
+    if (audioChannel)
+        audioChannel->init_start();
     return 0;
 }

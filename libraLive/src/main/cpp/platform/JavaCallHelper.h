@@ -9,7 +9,7 @@
 
 class JavaCallHelper {
 public:
-    JavaCallHelper(JavaVM *vm, JNIEnv *env, jobject instace);
+    JavaCallHelper(JavaVM *vm, JNIEnv *env, jobject instance);
 
     ~JavaCallHelper();
 

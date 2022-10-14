@@ -46,7 +46,7 @@ public:
                                 queue.size()
             );
 //            if (releaseCallBack)
-                releaseCallBack(value);
+            releaseCallBack(value);
         }
 
         pthread_mutex_unlock(&mutex);
@@ -90,7 +90,7 @@ public:
         while (!queue.empty()) {
             T value = queue.front();
 //            if (releaseCallBack)
-                releaseCallBack(value);
+            releaseCallBack(value);
             queue.pop();
         }
         pthread_mutex_unlock(&mutex);
@@ -121,7 +121,7 @@ public:
     void sync() {
         pthread_mutex_lock(&mutex);
 //        if (syncHandle)
-            syncHandle(queue);
+        syncHandle(queue);
         pthread_mutex_unlock(&mutex);
     }
 

@@ -296,8 +296,6 @@ void *task_init_stop(void *obj) {
     if (player) {
         player->init_stop();
     }
-
-    DELETE(player)
     return 0;
 }
 

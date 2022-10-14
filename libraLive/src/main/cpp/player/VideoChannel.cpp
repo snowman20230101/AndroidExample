@@ -74,9 +74,9 @@ void VideoChannel::start() {
     frames.gotoWork();
     packets.gotoWork();
     // 解码
-    pthread_create(&pid_decode, 0, task_decode, this);
+    pthread_create(&pid_decode, nullptr, task_decode, this);
     // 播放
-    pthread_create(&pid_render, 0, task_render, this);
+    pthread_create(&pid_render, nullptr, task_render, this);
 }
 
 void VideoChannel::stop() {
@@ -348,7 +348,7 @@ void *task_decode(void *obj) {
 }
 
 void *task_render(void *obj) {
-    VideoChannel *channel = static_cast<VideoChannel *>(obj);
+    auto *channel = static_cast<VideoChannel *>(obj);
     if (channel) {
         channel->render();
     }

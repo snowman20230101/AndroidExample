@@ -24,7 +24,7 @@ class NativeCaseTesting {
         }
 
 
-        external fun initBreakPad(path: String)
+        external fun initBreakPad(path: String, logPath: String)
 
     }
 }

@@ -13,46 +13,56 @@ extern JavaVM *javaVM;
 ANativeWindow *window = NULL;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-NiubiPlayer *player = NULL;
-
 /**
  * 绘制回调
  * @param src_data
- * @param line_size
- * @param w
- * @param ht
+ * @param src_lineSize
+ * @param width
+ * @param height
  */
-void renderFrameCallBack(uint8_t *src_data, int src_lineSize, int w, int ht);
+void renderFrameCallBack(uint8_t *src_data, int src_lineSize, int width, int height);
 
-static void com_windy_libralive_LibraPlayer_native_prepare(JNIEnv *env, jobject object,
-                                                           jstring data_source) {
+static jlong com_windy_libralive_LibraPlayer_native_prepare(JNIEnv *env, jobject object,
+                                                            jstring data_source) {
     const char *source = env->GetStringUTFChars(data_source, 0);
-    player = new NiubiPlayer(source, javaVM, env, object);
+    NiubiPlayer *player = new NiubiPlayer(source, javaVM, env, object);
     player->setRenderFrameCallBack(renderFrameCallBack);
     player->prepare();
     env->ReleaseStringUTFChars(data_source, source);
+    // reinterpret_cast的字面意思：重新解释（类型的比特位）。
+    return reinterpret_cast<jlong>(player);
 }
 
-static void com_windy_libralive_LibraPlayer_native_start(JNIEnv *env, jobject object) {
-    if (player) {
+static void
+com_windy_libralive_LibraPlayer_native_start(JNIEnv *env, jobject object, jlong playerHandle) {
+    if (playerHandle != 0) {
+        NiubiPlayer *player = reinterpret_cast<NiubiPlayer *> (playerHandle);
         player->start();
     }
 }
 
-static void com_windy_libralive_LibraPlayer_native_stop(JNIEnv *env, jobject object) {
-    if (player) {
+static void
+com_windy_libralive_LibraPlayer_native_stop(JNIEnv *env, jobject object, jlong playerHandle) {
+    if (playerHandle != 0) {
+        NiubiPlayer *player = reinterpret_cast<NiubiPlayer *> (playerHandle);
         player->stop();
     }
 }
 
-static void com_windy_libralive_LibraPlayer_native_release(JNIEnv *env, jobject object) {
+static void
+com_windy_libralive_LibraPlayer_native_release(JNIEnv *env, jobject object, jlong playerHandle) {
     LOGI("native_release() ANativeWindow_release()");
+    // TODO 这里有问题。release 的调用是在Activity生命周期中调用，但是 stop 函数是子线程调度的所以release中delete是有问题的。
+    // TODO 什么意思呢？stop 是异步调度的，什么时候执行完，不清楚。但是release 随着activity的生命周期，所以有内存泄漏了。
+    if (playerHandle != 0) {
+        NiubiPlayer *player = reinterpret_cast<NiubiPlayer *> (playerHandle);
+        DELETE(player)
+    }
     pthread_mutex_lock(&mutex);
     if (window) {
         ANativeWindow_release(window);
         window = 0;
     }
-//    DELETE(player)
     pthread_mutex_unlock(&mutex);
 }
 
@@ -99,10 +109,10 @@ int register_com_windy_libralive_LibraPlayer(JNIEnv *env) {
     const char *className = "com/windy/libralive/external/LibraLivePlayer";
 
     JNINativeMethod methods[] = {
-            {"native_prepare",    "(Ljava/lang/String;)V",     (void *) com_windy_libralive_LibraPlayer_native_prepare},
-            {"native_start",      "()V",                       (void *) com_windy_libralive_LibraPlayer_native_start},
-            {"native_stop",       "()V",                       (void *) com_windy_libralive_LibraPlayer_native_stop},
-            {"native_release",    "()V",                       (void *) com_windy_libralive_LibraPlayer_native_release},
+            {"native_prepare",    "(Ljava/lang/String;)J",     (void *) com_windy_libralive_LibraPlayer_native_prepare},
+            {"native_start",      "(J)V",                      (void *) com_windy_libralive_LibraPlayer_native_start},
+            {"native_stop",       "(J)V",                      (void *) com_windy_libralive_LibraPlayer_native_stop},
+            {"native_release",    "(J)V",                      (void *) com_windy_libralive_LibraPlayer_native_release},
             {"native_setSurface", "(Landroid/view/Surface;)V", (void *) com_windy_libralive_LibraPlayer_native_setSurface}
     };
 
@@ -143,7 +153,7 @@ void renderFrameCallBack(uint8_t *src_data, int src_lineSize, int width, int hei
 
     // 下面就是逐行Copy了
     for (int i = 0; i < windowBuffer.height; ++i) {
-        // 一行 一行 的 Copy 到 Android屏幕上
+        // 一行 一行 的 Copy 到 Android 屏幕上
         memcpy(dst_data + i * dstLineSize, src_data + i * src_lineSize, dstLineSize);
     }
 

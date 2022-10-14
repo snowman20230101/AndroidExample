@@ -8,6 +8,7 @@ class LibraLivePlayer(private val dataSource: String) : SurfaceHolder.Callback {
 
     lateinit var holder: SurfaceHolder
     lateinit var listener: OnPrepareListener
+    var playerHandle: Long = 0
 
     override fun surfaceCreated(holder: SurfaceHolder) {
     }
@@ -49,24 +50,27 @@ class LibraLivePlayer(private val dataSource: String) : SurfaceHolder.Callback {
         this.listener = listener
     }
 
-    fun prepare() = native_prepare(dataSource)
+    fun prepare() {
+        playerHandle = native_prepare(dataSource)
+    }
 
-    fun start() = native_start()
+    fun start() = native_start(playerHandle)
 
-    fun stop() = native_stop()
+    fun stop() = native_stop(playerHandle)
 
     fun release() {
         holder.removeCallback(this)
-        native_release()
+        native_release(playerHandle)
+        playerHandle = 0
     }
 
-    private external fun native_prepare(dataSource: String)
+    private external fun native_prepare(dataSource: String): Long
 
-    private external fun native_start()
+    private external fun native_start(playerHandle: Long)
 
-    private external fun native_stop()
+    private external fun native_stop(playerHandle: Long)
 
-    private external fun native_release()
+    private external fun native_release(playerHandle: Long)
 
     private external fun native_setSurface(surface: Surface)
 

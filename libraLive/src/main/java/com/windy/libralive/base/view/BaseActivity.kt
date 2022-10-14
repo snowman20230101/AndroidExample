@@ -29,6 +29,7 @@ abstract class BaseActivity : AppCompatActivity() {
         checkPermission()
         lifecycle.addObserver(object : LifecycleEventObserver {
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+
             }
         })
 

@@ -165,7 +165,7 @@ int main(int argc, char **argv)
         fill_samples((double *)src_data[0], src_nb_samples, src_nb_channels, src_rate, &t);
 
         /* compute destination number of samples */
-        dst_nb_samples = av_rescale_rnd(swr_get_delay(swr_ctx, src_rate) +
+        dst_nb_samples = av_rescale_rnd(swr_get_delay(swr_ctx, s) +
                                         src_nb_samples, dst_rate, src_rate, AV_ROUND_UP);
         if (dst_nb_samples > max_dst_nb_samples) {
             av_freep(&dst_data[0]);

@@ -34,7 +34,7 @@ file(GLOB source_file *.cpp
         util/*.cpp
         egl/*.cpp
         looper/*.cpp
-                egl/OffscreenSurface.cpp
+        egl/OffscreenSurface.cpp
         )
 
 # 引入头文件

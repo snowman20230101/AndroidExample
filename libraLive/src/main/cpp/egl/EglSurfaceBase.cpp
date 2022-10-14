@@ -69,7 +69,7 @@ void EglSurfaceBase::setPresentationTime(long nsecs) {
 
 // __attribute__((unused))
 char *EglSurfaceBase::getCurrentFrame() {
-    char *pixels = nullptr;
+    char *pixels;
     glReadPixels(0, 0, getWidth(), getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     return pixels;
 }
