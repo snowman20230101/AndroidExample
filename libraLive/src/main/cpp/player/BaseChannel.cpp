@@ -5,7 +5,8 @@
 #include "BaseChannel.h"
 
 BaseChannel::BaseChannel(int id, AVCodecContext *avCodecContext, AVRational time_base) {
-    LOGD("BaseChannel::BaseChannel() streamId=%d", id);
+    LOGD("BaseChannel::BaseChannel() streamId=%d, time_base.den=%d, time_base.num=%d", id,
+         time_base.den, time_base.num);
     this->id = id;
     this->mAvCodecContext = avCodecContext;
     this->time_base = time_base;
@@ -31,14 +32,14 @@ BaseChannel::~BaseChannel() {
 void BaseChannel::releaseAvFrame(AVFrame *&frame) {
     if (frame) {
         av_frame_free(&frame);
-        frame = 0;
+        frame = nullptr;
     }
 }
 
 void BaseChannel::releaseAvPacket(AVPacket *&packet) {
     if (packet) {
         av_packet_free(&packet);
-        packet = 0;
+        packet = nullptr;
     }
 }
 

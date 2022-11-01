@@ -38,9 +38,7 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="com.windy.libralive.ui.PlayerActivity"
-            android:screenOrientation="landscape" />
+        <activity android:name="com.windy.libralive.ui.PlayerActivity" />
 
         <activity android:name=".ui.CameraActivity" />
         <activity android:name=".ui.MediaCodecActivity" />

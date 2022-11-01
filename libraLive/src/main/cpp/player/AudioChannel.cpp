@@ -1,5 +1,5 @@
 //
-// Created by windy on 2021/12/23.
+/// Created by windy on 2021/12/23.
 //
 
 #include "AudioChannel.h"
@@ -236,45 +236,6 @@ int AudioChannel::getPcm() {
     // 重采样
     int64_t delays = swr_get_delay(swrContext, frame->sample_rate);
 
-    // 转换输出
-//    dst_nb_samples = av_rescale_rnd(
-//            delays + frame->nb_samples,
-//            out_sample_rate,
-//            frame->sample_rate,
-//            AV_ROUND_UP
-//    );
-//
-//    if (dst_nb_samples > max_dst_nb_samples) {
-//        LOGE("AudioChannel::getPcm() 缓冲区变了，重新调整");
-//        av_freep(&dst_data[0]);
-//        int ret = av_samples_alloc(dst_data, &dst_linesize, out_channels, (int) dst_nb_samples,
-//                                   dst_sample_fmt, 1);
-//        if (ret < 0) {
-//            LOGE("AudioChannel::getPcm() Error av_samples_alloc ...");
-//        }
-//
-//        max_dst_nb_samples = dst_nb_samples;
-//    }
-//
-//    // 上下文+输出缓冲区+输出缓冲区能接受的最大数据量+输入数据+输入数据个数
-//    // 返回 每一个声道的输出数据个数
-//    int samples = swr_convert(swrContext,
-//                              dst_data,
-//                              (int) dst_nb_samples,
-//                              (const uint8_t **) frame->data,
-//                              frame->nb_samples
-//    );
-//
-//    // 获取给定音频参数所需的缓冲区大小
-//    pcm_data_size = av_samples_get_buffer_size(
-//            &dst_linesize,
-//            out_channels,
-//            samples,
-//            dst_sample_fmt,
-//            1
-//    );
-
-
     // 将 nb_samples 个数据 由 sample_rate采样率转成 44100 后 返回多少个数据
     // 10  个 48000 = nb 个 44100
     // AV_ROUND_UP : 向上取整 1.1 = 2
@@ -306,7 +267,10 @@ int AudioChannel::getPcm() {
 }
 
 void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
-    AudioChannel *audioChannel = static_cast<AudioChannel *>(context);
+    auto *audioChannel = static_cast<AudioChannel *>(context);
+    if (!audioChannel) {
+        return;
+    }
     //获得pcm 数据 多少个字节 out_buffers
     int dataSize = audioChannel->getPcm();
     if (dataSize > 0) {
@@ -442,14 +406,14 @@ void AudioChannel::stop() {
 }
 
 void *audio_decode(void *args) {
-    AudioChannel *audioChannel = static_cast<AudioChannel *>(args);
+    auto *audioChannel = static_cast<AudioChannel *>(args);
     if (audioChannel)
         audioChannel->decode();
     return 0;
 }
 
 void *audio_play(void *args) {
-    AudioChannel *audioChannel = static_cast<AudioChannel *>(args);
+    auto *audioChannel = static_cast<AudioChannel *>(args);
     if (audioChannel)
         audioChannel->init_start();
     return 0;

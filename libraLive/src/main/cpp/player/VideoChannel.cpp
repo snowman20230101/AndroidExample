@@ -86,14 +86,14 @@ void VideoChannel::stop() {
     frames.backWork();
     packets.backWork();
 
-    pthread_join(pid_decode, 0);
-    pthread_join(pid_render, 0);
+    pthread_join(pid_decode, nullptr);
+    pthread_join(pid_render, nullptr);
 }
 
 void VideoChannel::decode() {
     LOGD("VideoChannel::decode() start isPlaying=%d", isPlaying);
 
-    AVPacket *packet = 0; // AVPacket 专门存放 压缩数据（H264）
+    AVPacket *packet = nullptr; // AVPacket 专门存放 压缩数据（H264）
     AVFrame *frame = av_frame_alloc();
     while (isPlaying) {
         if (isPlaying && frames.size() > 100) {
@@ -273,11 +273,11 @@ void VideoChannel::render() {
 
         // 拿到音频 播放时间基 audioChannel.audioTime
         double_t audioTime = this->audioChannel->audioTime; // 音频那边的值，是根据它来计算的
-        LOGE("best_effort_timestamp=%lld, extra_delay=%f, audioTime=%f, videoTime=%f, pts=%lld, pkt_dts=%lld",
-             frame->best_effort_timestamp,
-             extra_delay, audioTime, videoTime,
-             frame->pts, frame->pkt_dts
-        );
+//        LOGE("best_effort_timestamp=%lld, extra_delay=%f, audioTime=%f, videoTime=%f, pts=%lld, pkt_dts=%lld",
+//             frame->best_effort_timestamp,
+//             extra_delay, audioTime, videoTime,
+//             frame->pts, frame->pkt_dts
+//        );
 
         // 计算 音频 和 视频的 差值
         double time_diff = videoTime - audioTime;
@@ -289,10 +289,10 @@ void VideoChannel::render() {
 
             // 灵活等待【慢下来，睡眠的方式】
             if (time_diff > 1) {
-                av_usleep((result_delay * 2) * 1000000); // 久一点
+                av_usleep((int) (result_delay * 2) * 1000000); // 久一点
             } else {
                 // 0 ~ 1 说明相差不大
-                av_usleep((time_diff + result_delay) * 1000000);
+                av_usleep((int) (time_diff + result_delay) * 1000000);
             }
 
         } else if (time_diff < 0) {
@@ -325,21 +325,21 @@ void VideoChannel::render() {
     av_freep(&dst_data[0]);
 
     sws_freeContext(swsContext);
-    swsContext = NULL;
+    swsContext = nullptr;
 
-    LOGD("VideoChannel::render() function end isPlaying=%d", isPlaying);
+    LOGE("VideoChannel::render() function end isPlaying=%d", isPlaying);
 }
 
-void VideoChannel::setRenderFrameCallBack(RenderFrameCallback renderFrameCallback) {
-    this->renderFrameCallback = renderFrameCallback;
+void VideoChannel::setRenderFrameCallBack(RenderFrameCallback frameCallback) {
+    this->renderFrameCallback = frameCallback;
 }
 
-void VideoChannel::setAudioChannel(AudioChannel *audioChannel) {
-    this->audioChannel = audioChannel;
+void VideoChannel::setAudioChannel(AudioChannel *channel) {
+    this->audioChannel = channel;
 }
 
 void *task_decode(void *obj) {
-    VideoChannel *channel = static_cast<VideoChannel *>(obj);
+    auto *channel = static_cast<VideoChannel *>(obj);
     if (channel) {
         channel->decode();
     }

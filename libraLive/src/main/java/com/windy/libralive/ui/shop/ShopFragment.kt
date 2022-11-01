@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.*
 import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.blankj.utilcode.util.ToastUtils
@@ -20,6 +21,7 @@ import com.windy.libralive.ui.FirstActivity
 import com.windy.libralive.ui.MainActivity
 import com.windy.libralive.ui.MediaCodecActivity
 import com.windy.libralive.ui.PlayerActivity
+import com.windy.libralive.uitl.Utils
 import java.io.File
 
 class ShopFragment : BaseFragment() {
@@ -74,15 +76,17 @@ class ShopFragment : BaseFragment() {
     private fun initListener() {
         // 播放器
         binding.ffmpegPlayTest.setOnClickListener {
-            val intent = Intent(activity, PlayerActivity::class.java)
-            val file = File(activity?.getExternalFilesDir(""), "haoshengyin_4.mp4")
-            intent.putExtra(
-                "url",
-//                "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"
-                file.absolutePath
+//            val intent = Intent(activity, PlayerActivity::class.java)
+//            val file = File(activity?.getExternalFilesDir(""), "haoshengyin_4.mp4")
+//            intent.putExtra(
+//                "url",
+////                "http://liteavapp.qcloud.com/live/liteavdemoplayerstreamid.flv"
+//                file.absolutePath
+//
+//            )
+//            startActivity(intent)
 
-            )
-            startActivity(intent)
+            chooseVideoFile()
         }
 
         // 测试登录
@@ -109,6 +113,29 @@ class ShopFragment : BaseFragment() {
     override fun onPause() {
         super.onPause()
 //        showWindowT()
+    }
+
+    private fun chooseVideoFile(index: Int = 0) {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "video/*"
+        startActivityForResult(intent, index)
+    }
+
+    private var filePath: String? = ""
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == AppCompatActivity.RESULT_OK) {
+            val uri = data!!.data
+            filePath = if ("file".equals(uri!!.scheme, ignoreCase = true)) {
+                uri.path
+            } else {
+                Utils.getPathFromUri(requireActivity(), uri)
+            }
+
+            startActivity(Intent(activity, PlayerActivity::class.java).apply {
+                putExtra("url", filePath)
+            })
+        }
     }
 
     @SuppressLint("InflateParams")

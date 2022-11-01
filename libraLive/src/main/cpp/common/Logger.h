@@ -18,6 +18,8 @@ static const int MAX_LOG_LENGTH = 16 * 1024;
 // 定义日志文件地址
 static char appLogPath[100];
 
+static bool isSaveLog = false;
+
 // 定义 printf
 #if defined(__GNUC__) && (__GNUC__ >= 4)
 #define CC_FORMAT_PRINTF(formatPos, argPos) __attribute__((__format__(printf, formatPos, argPos)))
@@ -28,6 +30,10 @@ static char appLogPath[100];
 #else
 #define CC_FORMAT_PRINTF(formatPos, argPos)
 #endif
+
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 /**
  *
@@ -178,14 +184,16 @@ static void _log_native_print(android_LogPriority level, const char *tag,
         return;
     }
 
-    len = snprintf(buf, sizeof(buf) - 1, "[%s] [%02d:%02d:%02d.%03d] [%08lx] ",
-                   getTimeByYMD(),
-                   time->tm_hour,
-                   time->tm_min,
-                   time->tm_sec,
-                   int(now.tv_usec / 1000),
-                   pthread_self()
-    );
+    if (isSaveLog) {
+        len = snprintf(buf, sizeof(buf) - 1, "[%s] [%02d:%02d:%02d.%03d] [%08lx] ",
+                       getTimeByYMD(),
+                       time->tm_hour,
+                       time->tm_min,
+                       time->tm_sec,
+                       int(now.tv_usec / 1000),
+                       pthread_self()
+        );
+    }
 
     if (len >= 0 && len < sizeof(buf)) {
         vsnprintf(buf + len, sizeof(buf) - len - 1, format, args);
@@ -193,41 +201,44 @@ static void _log_native_print(android_LogPriority level, const char *tag,
 
     // 之前的空间应该已经处理好了。
     strcat(buf, "\n");
-    std::string path = CC_FORMAT("%s/okay_log_%d_%d.log",
-                                 appLogPath,
-                                 (time->tm_mon + 1),
-                                 time->tm_mday
-    );
 
-    FILE *fd = fopen(path.c_str(), "a");
-    if (fd) {
-        fputs(buf, fd);
-        fflush(fd);
-        fclose(fd);
+    if (isSaveLog) {
+        std::string path = CC_FORMAT("%s/okay_log_%d_%d.log",
+                                     appLogPath,
+                                     (time->tm_mon + 1),
+                                     time->tm_mday
+        );
+
+        FILE *fd = fopen(path.c_str(), "a");
+        if (fd) {
+            fputs(buf, fd);
+            fflush(fd);
+            fclose(fd);
+        }
     }
 
     __android_log_print(level, tag, "%s", buf);
 }
 
-static void LOGD(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    _log_native_print(ANDROID_LOG_DEBUG, LOG_TAG, format, args);
-    va_end(args);
-}
-
-static void LOGI(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    _log_native_print(ANDROID_LOG_INFO, LOG_TAG, format, args);
-    va_end(args);
-}
-
-static void LOGE(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    _log_native_print(ANDROID_LOG_ERROR, LOG_TAG, format, args);
-    va_end(args);
-}
+//static void LOGD(const char *format, ...) {
+//    va_list args;
+//    va_start(args, format);
+//    _log_native_print(ANDROID_LOG_DEBUG, LOG_TAG, format, args);
+//    va_end(args);
+//}
+//
+//static void LOGI(const char *format, ...) {
+//    va_list args;
+//    va_start(args, format);
+//    _log_native_print(ANDROID_LOG_INFO, LOG_TAG, format, args);
+//    va_end(args);
+//}
+//
+//static void LOGE(const char *format, ...) {
+//    va_list args;
+//    va_start(args, format);
+//    _log_native_print(ANDROID_LOG_ERROR, LOG_TAG, format, args);
+//    va_end(args);
+//}
 
 #endif //ANDROIDEXAMPLE_LOGGER_H

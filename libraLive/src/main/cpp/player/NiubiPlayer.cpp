@@ -50,7 +50,7 @@ void NiubiPlayer::init_prepare() {
     avformat_network_init();
 
     this->formatContext = avformat_alloc_context();
-    AVDictionary *options = NULL;
+    AVDictionary *options = nullptr;
     av_dict_set(&options, "timeout", "50000", 0);
     LOGE("dataSource is %s", this->dataSource);
 
@@ -74,24 +74,24 @@ void NiubiPlayer::init_prepare() {
 
     this->duration = formatContext->duration / 1000000; // 视频时长（单位：微秒us，转换为秒需要除以1000000）
 
-//    fprintf(stdout, "dictionary count: %d\n", av_dict_count(this->formatContext->metadata));
-//    AVDictionaryEntry *entry = nullptr;
-//    while ((entry = av_dict_get(this->formatContext->metadata, "", entry, AV_DICT_IGNORE_SUFFIX))) {
-//        fprintf(stdout, "key: %s, value: %s\n", entry->key, entry->value);
-//    }
+    fprintf(stdout, "dictionary count: %d\n", av_dict_count(this->formatContext->metadata));
+    AVDictionaryEntry *entry = nullptr;
+    while ((entry = av_dict_get(this->formatContext->metadata, "", entry, AV_DICT_IGNORE_SUFFIX))) {
+        fprintf(stdout, "key: %s, value: %s\n", entry->key, entry->value);
+    }
 
     for (int i = 0; i < this->formatContext->nb_streams; ++i) {
         AVStream *avStream = this->formatContext->streams[i];
         AVCodecParameters *codecParameters = avStream->codecpar;
         AVCodec *avCodec = avcodec_find_decoder(codecParameters->codec_id);
-        if (avCodec == NULL) {
+        if (avCodec == nullptr) {
             LOGE("查找解码器失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_FIND_DECODER_FAIL);
             return;
         }
 
         AVCodecContext *avCodecContext = avcodec_alloc_context3(avCodec);
-        if (avCodecContext == NULL) {
+        if (avCodecContext == nullptr) {
             LOGE("创建解码上下文失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_ALLOC_CODEC_CONTEXT_FAIL);
             return;
@@ -121,13 +121,13 @@ void NiubiPlayer::init_prepare() {
              codecName,
              time_base.num,
              time_base.den,
-             getTimeByHMS(duration),
+             getTimeByHMS((time_t) duration),
              duration,
              codec_time_base.num,
              codec_time_base.den
         );
 
-//        av_dump_format(this->formatContext, 0, this->dataSource, 0);
+        av_dump_format(this->formatContext, 0, this->dataSource, 0);
 
         if (codecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {
             // 获取视频相关的 fps
@@ -209,7 +209,7 @@ void NiubiPlayer::init_start() {
             } else if (videoChannel && packet->stream_index == videoChannel->id) {
                 // 如果他们两 相等 说明是视频  视频包
                 videoChannel->packets.push(packet);
-//                av_log2_16bit(1);
+                LOGD("video key flag=%d", packet->flags);
             }
         } else if (ret == AVERROR_EOF) {
             // 读取完成 但是可能还没播放完
@@ -276,23 +276,23 @@ void NiubiPlayer::releaseFormatContext() {
 }
 
 void *task_init_prepare(void *obj) {
-    NiubiPlayer *player = static_cast<NiubiPlayer *>(obj);
+    auto *player = static_cast<NiubiPlayer *>(obj);
     if (player) {
         player->init_prepare();
     }
-    return 0;
+    return nullptr;
 }
 
 void *task_init_start(void *obj) {
-    NiubiPlayer *player = static_cast<NiubiPlayer *>(obj);
+    auto *player = static_cast<NiubiPlayer *>(obj);
     if (player) {
         player->init_start();
     }
-    return 0;
+    return nullptr;
 }
 
 void *task_init_stop(void *obj) {
-    NiubiPlayer *player = static_cast<NiubiPlayer *>(obj);
+    auto *player = static_cast<NiubiPlayer *>(obj);
     if (player) {
         player->init_stop();
     }
