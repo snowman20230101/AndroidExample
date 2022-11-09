@@ -38,7 +38,7 @@ class HomeFragment : BaseFragment() {
             defaultViewModelProviderFactory
         )[HomeViewModel::class.java]
 
-        viewModel.login("zhenchengbinbin@163.ocm", "zhang2281060*")
+        viewModel.login("1234", "123456")
 //        loadImage()
         viewModel.getArticleJson(0)
     }
